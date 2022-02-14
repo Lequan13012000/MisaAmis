@@ -49,7 +49,7 @@ import BaseButton from "../base/BaseButton.vue";
 import BaseCombobox from "../base/BaseCombobox.vue";
 import "../../element-variables.scss";
 import { mapState } from "vuex";
-import { mapMutations } from 'vuex';
+// import { mapMutations } from 'vuex';
 import ChooseAnswer from "../dialog/ChooseAnswer.vue";
 import TrueFalseAnswer from "../dialog/TrueFalseAnswer.vue";
 import FillBlankAnswer from "../dialog/FillBlankAnswer.vue";
@@ -89,18 +89,25 @@ export default {
       * Ẩn hiện popup lựa chọn loại câu hỏi
       * CreatedBy: LEQUAN (11/02/2022)
       */
-     ...mapMutations["questionType",["showHideQuestionType","questionType"]],
-     ...mapMutations["",["showComposeHideToolBar"]]
-
+     showHideQuestionType() {
+        this.$store.commit("questionType/showHideQuestionType");
+     },
+     /**
+      * Ẩn hiện form chọn câu hỏi hiển thị form soạn câu hỏi
+      * CreatedBy: LEQUAN (11/02/2022)
+      */
+     showComposeHideToolBar(){
+         this.$store.commit("composeQuestion/showComposeHideToolBar");
+     }
   },
   computed: {
-    ...mapState(["dynamics","isShowQuestionType"]),
+    ...mapState("questionType",["dynamics","isShowQuestionType"]),
     selectQuestion:{
   get () {
-      return this.$store.state.selectQuestion;
+      return this.$store.state.questionType.selectQuestion;
     },
     set (value) {
-      this.$store.commit('questionType',value);
+      this.$store.commit('questionType/questionType',value);
     }
     },
      /**

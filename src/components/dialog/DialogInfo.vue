@@ -136,7 +136,7 @@ import BaseInput from "../base/BaseInput.vue";
 import BaseCombobox from "../base/BaseCombobox.vue";
 import BaseButton from "../base/BaseButton.vue";
 import { mapState } from "vuex";
-import { mapMutations } from 'vuex';
+// import { mapMutations } from 'vuex';
 // import VoerroTagsInput from "@voerro/vue-tagsinput";
 export default {
   components: {
@@ -216,7 +216,10 @@ export default {
      * Hàm lưu dữ liệu thông tin bài tập
      * CreatedBy: LEQUAN(14/02/2022)
      */
-    ...mapMutations["exercise",["saveDataExercise"]]
+    // ...mapMutations["exercise",["saveDataExercise"]]
+    saveDataExercise(){
+      this.$store.commit("exercise/saveDataExercise")
+    }
   },
 };
 </script>

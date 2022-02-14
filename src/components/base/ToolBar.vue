@@ -65,10 +65,13 @@ export default {
      * Click chọn loại câu hỏi
      * CreatedBy:LEQUAN(11/02/2022)
      */
-    ...mapMutations["showHideQuestionType","questionType"]
-    // showHideQuestionType() {
-    //   this.$store.commit("questionType/showHideQuestionType");
-    // },
+    // ...mapMutations["showHideQuestionType","questionType"]
+    showHideQuestionType(value) {
+      this.$store.commit("questionType/showHideQuestionType",value);
+    },
+    questionType(){
+       this.$store.commit("questionType/questionType");
+    }
   },
   computed: {
     ...mapState("questionType", ["selectQuestion"]),

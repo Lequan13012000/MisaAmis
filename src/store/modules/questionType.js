@@ -42,8 +42,9 @@ const questionType = {
          * Ẩn form combobox chọn loại câu hỏi
          * CreateBy:LEQUAN(11/2/2022)
          */
-        showHideQuestionType(state) {
+        showHideQuestionType(state, value) {
             state.isShowQuestionType = !state.isShowQuestionType;
+            state.selectQuestion = value;
         },
     }
 }
