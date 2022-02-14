@@ -32,7 +32,9 @@
           alt=""
           class="question_icon"
         />
-        <div class="question__desc" @click="showHideQuestionType(5)">Tự luận</div>
+        <div class="question__desc" @click="showHideQuestionType(5)">
+          Tự luận
+        </div>
       </div>
       <div class="question">
         <img
@@ -56,20 +58,21 @@
 
 <script>
 import { mapState } from "vuex";
+// import { mapMutations } from "vuex";
 export default {
   methods: {
-     /**
+    /**
      * Click chọn loại câu hỏi
      * CreatedBy:LEQUAN(11/02/2022)
      */
-     showHideQuestionType(value){
-        this.$store.commit("showHideQuestionType");
-         this.$store.commit('questionType',value);
-    }
+    ...mapMutations["showHideQuestionType","questionType"]
+    // showHideQuestionType() {
+    //   this.$store.commit("questionType/showHideQuestionType");
+    // },
   },
-  computed:{
-     ...mapState(["selectQuestion"]),
-  }
+  computed: {
+    ...mapState("questionType", ["selectQuestion"]),
+  },
 };
 </script>
 

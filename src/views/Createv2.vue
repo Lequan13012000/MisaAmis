@@ -75,20 +75,10 @@ export default {
     }
   },
   methods: {
-     /**
-      * Ẩn hiện form chọn câu hỏi hiển thị form soạn câu hỏi
-      * CreatedBy: LEQUAN (11/02/2022)
-      */
-     showComposeHideToolBar(){
-
-       mapMutations(["showComposeHideToolBar"]);
-        //  this.$store.commit();
-     },
-      //  this.$store.commit("backShowComposeHideToolBar");
-        ...mapMutations(["backShowComposeHideToolBar"])
+        ...mapMutations("composeQuestion",["backShowComposeHideToolBar","showComposeHideToolBar"]),
   },
    computed:{
-     ...mapState(["isShowToolBar","isShowComposeQuestion"])
+     ...mapState("composeQuestion",["isShowToolBar","isShowComposeQuestion"])
   }
  
 };

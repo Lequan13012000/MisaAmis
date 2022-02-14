@@ -37,8 +37,10 @@
             </div>
             <div class="title-storage-right">
               <BaseButton>Chia sẻ</BaseButton>
-                <BaseButton class="composing-button" @click.native="showHideDialog"
-                  >Soạn bài</BaseButton
+              <BaseButton
+                class="composing-button"
+                @click.native="showHideDialog"
+                >Soạn bài</BaseButton
               >
             </div>
           </div>
@@ -80,7 +82,7 @@
           </div>
         </div>
       </div>
-        <DialogInfo ref="childDialogInfo" />
+      <DialogInfo ref="childDialogInfo" />
     </div>
   </div>
 </template>
@@ -102,23 +104,25 @@ export default {
     // component gird table
     BaseGridView,
     // popup bổ sung thông tin
-    DialogInfo
+    DialogInfo,
   },
   data() {
     return {
       placeholder: "",
-      topics:[]
+      topics: [],
     };
   },
   computed: {
-    ...mapState(["subjects", "grades"]),
+    ...mapState("subjects", ["subjects"]),
+    ...mapState("grades", ["grades"]),
   },
   methods: {
     // Ẩn hiện dialog bổ sung thông tin
-    showHideDialog(){
-      this.$refs.childDialogInfo.isShowHideDialog = !this.$refs.childDialogInfo.isShowHideDialog;
-    }
-  }
+    showHideDialog() {
+      this.$refs.childDialogInfo.isShowHideDialog =
+        !this.$refs.childDialogInfo.isShowHideDialog;
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
