@@ -17,9 +17,10 @@ export default {
   data() {
     return {
       editor: ClassicEditor,
-      editorData: "<p>Nhập câu hỏi tại đây...</p>",
+      editorData: "",
       editorConfig: {
         // The configuration of the editor.
+        placeholder:"Nhập đáp án..."
       },
     };
   },

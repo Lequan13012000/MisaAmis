@@ -54,13 +54,18 @@
         </div>
         <div class="select">
           <div class="thumbnail-lazy">
-            <textarea
+            <!-- <textarea
               name=""
               id=""
               cols="30"
               rows="1"
               placeholder="Nhập đáp án..."
-            ></textarea>
+            ></textarea> -->
+            <div class="ck-editor-custom">
+      <CKEditor />
+            </div>
+      
+
             <div class="head">
               <div class="index">C</div>
               <div class="right">
@@ -109,8 +114,11 @@
 
 <script>
 import "../../element-variables.scss";
+import CKEditor from "../base/CkEditor.vue";
 export default {
-  components: {},
+  components: {
+    CKEditor,
+  },
   data() {
     return {};
   },
@@ -231,38 +239,67 @@ export default {
                       top: 0;
                       left: 0;
                       width: 100%;
-                      height: 100%;
+                    height: calc(100% - 54px);
                       z-index: 1;
                       background: no-repeat 50%;
-                      //   padding: 48px 8px;
+                      padding-top: 48px;
                       padding-bottom: 12px;
                       display: flex !important;
                       justify-content: center;
                       align-items: center;
                       background-color: rgb(255, 214, 240);
-                      textarea {
-                        resize: none;
-                        width: 92%;
-                        height: 77%;
-                        margin-top: 43px;
-                        border: none;
-                        border-radius: 9px;
-                        text-align: center;
-                        &::placeholder {
-                          left: 30%;
-                          position: absolute;
-                          top: 40%;
-                        }
-                        background-color: #ffd6f0;
-                        &:focus {
-                          outline: none;
-                          background-color: #ffff;
-                          &::placeholder {
-                            color: transparent;
-                          }
-                        }
+                      padding-bottom: 16px;
+                      .ck-editor-custom{
+                        height: 100%;
+                        width: 100%;
+                        padding-left: 16px;
+                        padding-right: 16px;
+                        
+ ::v-deep .ck.ck-editor {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                         .ck.ck-reset_all {
+                        display: none;
                       }
-                   
+                      .ck-editor__main{
+                          height: 100%;
+                        }
+                        .ck.ck-editor__main>.ck-editor__editable{
+    text-align: center;
+    display: flex;flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    
+}
+
+                      }
+                     
+                      }
+                     
+                      // textarea {
+                      //   resize: none;
+                      //   width: 92%;
+                      //   height: 77%;
+                      //   margin-top: 43px;
+                      //   border: none;
+                      //   border-radius: 9px;
+                      //   text-align: center;
+                      //   &::placeholder {
+                      //     left: 30%;
+                      //     position: absolute;
+                      //     top: 40%;
+                      //   }
+                      //   background-color: #ffd6f0;
+                      //   &:focus {
+                      //     outline: none;
+                      //     background-color: #ffff;
+                      //     &::placeholder {
+                      //       color: transparent;
+                      //     }
+                      //   }
+                      // }
+
                       .head {
                         position: absolute;
                         top: 0;
