@@ -1,8 +1,9 @@
 <template>
   <ckeditor
     :editor="editor"
-    v-model="editorData"
+    :value="value"
     :config="editorConfig"
+    @input="handleInput"
   ></ckeditor>
 </template>
 
@@ -20,59 +21,54 @@ export default {
       editorData: "",
       editorConfig: {
         // The configuration of the editor.
-        placeholder:"Nhập đáp án..."
+        placeholder: "Nhập đáp án...",
       },
     };
+  },
+  props: {
+    value: {
+      type: String,
+      default: ""
+    },
+    index: {
+      type: Number,
+      default: 0
+    },
+  },
+  methods: {
+    handleInput(value) {
+      this.$emit("input", this.index, value);
+    },
   },
 };
 </script>
 
 <style lang="scss">
-// .ck.ck-editor {
-//    width: 100%;
-//     padding: 0 8px;
-//     margin-top: 38px;
-//     border: none;
-// }
-// .ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
-//   height: 156px;
-// }
-// .ck-rounded-corners .ck.ck-editor__main>.ck-editor__editable, .ck.ck-editor__main>.ck-editor__editable.ck-rounded-corners {
-//     height: 196px;
-//     border: none;
-//     display:flex;
-//     align-items: center;
-// }
-// .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
-//     border: none;
-// }
-// .ck.ck-reset_all * {
-//     display: none;
-// }
+
 .ck.ck-dropdown {
-    display: none;
+  display: none;
 }
-.ck.ck-editor__main > .ck-editor__editable{
+.ck.ck-editor__main > .ck-editor__editable {
   border-color: var(--ck-color-base-border);
   border: none;
   font-size: 16px;
   background-color: #fff2ab;
-  &:focus{
-      border: none;
-      box-shadow: none;
+  &:focus {
+    border: none;
+    box-shadow: none;
   }
 }
-.ck-rounded-corners .ck.ck-editor__top .ck-sticky-panel .ck-toolbar{
-    background-color: #fff2ab;
-    border: none;
+.ck-rounded-corners .ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+  background-color: #fff2ab;
+  border: none;
 }
-.ck.ck-toolbar.ck-toolbar_grouping>.ck-toolbar__items {
-    flex-wrap: nowrap;
-    display: flex;
-    justify-content: flex-end;
+.ck.ck-toolbar.ck-toolbar_grouping > .ck-toolbar__items {
+  flex-wrap: nowrap;
+  display: flex;
+  justify-content: flex-end;
 }
 .ck.ck-toolbar .ck.ck-toolbar__separator {
-    display: none;
+  display: none;
 }
 // .ck.ck-editor__editable_inline>:last-child {
 //     margin-bottom: var(--ck-spacing-large);
@@ -80,5 +76,4 @@ export default {
 //     top: 50%;
 //     left: 43%;
 // }
-
 </style>

@@ -6,12 +6,26 @@
       class="m-input m-input-search"
       id="txtSearch"
       placeholder="Nhập tên học liệu để tìm kiếm"
+      @input="handleInput"
+         @keydown="handleKeyDown"
     />
   </div>
 </template>
 
 <script>
-export default {};
+export default {
+  props: {
+    value: { type: [String, Number], default: "" },
+  },
+  methods: {
+    handleInput(e) {
+      this.$emit("input", e.target.value);
+    },
+    handleKeyDown(e) {
+      this.$emit("keydown", e);
+    },
+  },
+};
 </script>
 <style lang="scss" scoped>
 .m-base-input-search {
@@ -56,6 +70,6 @@ export default {};
   }
   .m-input:focus {
     border-color: #8a6bf6;
-}
+  }
 }
 </style>

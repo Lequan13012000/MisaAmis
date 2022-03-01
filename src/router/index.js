@@ -10,8 +10,13 @@ const routes = [{
         name: "Home",
         component: Home,
     },
+    // {
+    //     path: "/storage/createv2",
+    //     name: "Createv2",
+    //     component: Createv2,
+    // },
     {
-        path: "/storage/createv2",
+        path: "/storage/:id",
         name: "Createv2",
         component: Createv2,
     },

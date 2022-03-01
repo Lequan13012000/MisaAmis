@@ -1,10 +1,11 @@
 <template>
   <el-select
-    v-model="value"
+    :value="value"
     filterable
     clearable
     :placeholder="placeholder"
     @input="handleInput"
+    @change="changeData"
   >
     <el-option
       v-for="item in dataOptions"
@@ -19,9 +20,7 @@
 <script>
 export default {
   data() {
-    return {
-      value: ""
-    };
+    return {};
   },
   // emits: ["input"],
   props: {
@@ -44,13 +43,32 @@ export default {
       type: String,
       default: "",
     },
-    // value: { type: [String, Number], default: "" },
+    value: { type: [String, Number], default: "" },
   },
   methods: {
     handleInput(value) {
       this.$emit("input", value);
     },
+    changeData(event) {
+      const dataSelected = this.dataOptions.find(
+        (option) => option[this.fieldValue] == event
+      );
+      // if(dataSelected)
+      this.$emit("changeData", dataSelected);
+    },
   },
+  // computed: {
+  //   valueSelected: {
+  //     // getter
+  //     get: function () {
+  //       return this.value;
+  //     },
+  //     // setter
+  //     set: function (newValue) {
+  //       this.value = newValue;
+  //     },
+  //   },
+  // },
 };
 </script>
 <style lang="scss">

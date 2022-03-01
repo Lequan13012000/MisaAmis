@@ -1,22 +1,33 @@
 <template>
-  <div class="grid-container">
-    <div class="item-storage">
+  <div class="grid-container" v-if="exercise.length > 0">
+    <router-link
+      :to="`/storage/${exe.exerciseId}`"
+      class="item-storage"
+      v-for="(exe, index) in exercise"
+      :key="index"
+      @click.native="
+        showComposeHideToolBar();
+ 
+      "
+    >
       <div class="thumbnail-lazy">
         <div class="avatar">
           <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
+            <div class="subject-content">
+              {{ exe.gradeName }} - {{ exe.subjectName }}
+            </div>
             <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
+              :src="exe.avatar"
               alt=""
             />
           </div>
         </div>
         <div class="describe">
-          <div class="title-describe">
+          <div class="title-describe" @click="handleClickMenu" >
             <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
+              <span>{{ exe.exerciseName }}</span>
             </div>
-            <div class="button-more">
+            <div class="button-more" @click="showOption(index)">
               <div class="icon-option">
                 <img
                   src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
@@ -24,6 +35,26 @@
                 />
               </div>
             </div>
+            <ul
+              :class="[
+                'option__list',
+                { 'option__list--active': isShowOption == index },
+              ]"
+            >
+              <li class="item">
+                <router-link
+                   :to="`/storage/${exe.exerciseId}`"
+                  class="btn"
+                  @click="
+                    showComposeHideToolBar();
+                  "
+                  >Xem</router-link
+                >
+              </li>
+              <li class="item">
+                <button class="btn" style="width: 100%" @click="deleteExercise(exe.exerciseId)">Xóa</button>
+              </li>
+            </ul>
           </div>
           <div class="number">
             <div class="num-left">
@@ -32,259 +63,81 @@
                   <img
                     src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
                   />
-                  <pre> 7 câu </pre>
+                  <span>
+                    {{ exe.questions ? exe.questions.length : 0 }} câu
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="item-storage">
-      <div class="thumbnail-lazy">
-        <div class="avatar">
-          <div class="thumbnail-lazy">
-            <div class="subject-content">Khối 4 - Tiếng Anh</div>
-            <img
-              src="https://sisapapp.misacdn.net/lms/img/tienganh.d1e304bc.png"
-              alt=""
-            />
-          </div>
-        </div>
-        <div class="describe">
-          <div class="title-describe">
-            <div class="exercise-name">
-              <span>Bài tập mẫu - Unit 2: I’m from Japan</span>
-            </div>
-            <div class="button-more">
-              <div class="icon-option">
-                <img
-                  src="https://sisapapp.misacdn.net/lms/img/icon_option.90d8b4a5.svg"
-                  alt=""
-                />
-              </div>
-            </div>
-          </div>
-          <div class="number">
-            <div class="num-left">
-              <div class="num-leftct">
-                <div class="num-leftct-detail">
-                  <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_number_aswer.e8c79201.svg"
-                  />
-                  <pre> 7 câu </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </router-link>
   </div>
 </template>
 
 <script>
-export default {};
+import { mapState } from "vuex";
+export default {
+  data() {
+    return {
+      // ẩn hiện option xem xóa bài tập
+      isShowOption: null,
+    };
+  },
+  mounted() {
+    this.$store.dispatch("exerciseList/loadExercise");
+  },
+  computed: {
+    ...mapState("exercise", ["exercise"]),
+      ...mapState("exerciseList", ["exercise"]),
+  },
+  props: {
+    // id bài tập được Chọn
+    exerciseSelected: null,
+  },
+  methods: {
+    /**
+     * Ẩn hiện form chọn câu hỏi hiển thị form soạn câu hỏi
+     * CreatedBy: LEQUAN (11/02/2022)
+     */
+    showComposeHideToolBar() {
+      this.$store.commit("composeQuestion/showComposeHideToolBar");
+    },
+    /**
+     * Lấy id của bài tập đc Chọn
+     * CreatedBy: LEQUAN (21/02/2022)
+     */
+    getExerciseId(value) {
+        //e.preventDefault();
+      console.log(value);
+      this.$store.dispatch("exerciseList/loadExerciseSelected", value);
+    },
+    /**
+     * Ẩn hiện option xem xóa bài tập
+     * CreatedBy: LEQUAN (21/02/2022)
+     */
+    showOption(index) {
+      console.log("showoption");
+      if (index == this.isShowOption) {
+        this.isShowOption = null;
+      } else {
+        this.isShowOption = index;
+      }
+    },
+    handleClickMenu(e) {
+      e.preventDefault();
+    },
+     /**
+     * Xóa bài tập
+     * CreatedBy: LEQUAN (21/02/2022)
+     */
+    deleteExercise(value){
+      this.isShowOption = null;
+      this.$store.dispatch("exerciseList/deleteExercise",value);
+    }
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -411,6 +264,51 @@ export default {};
           }
         }
       }
+      .option {
+        position: relative;
+        &__list {
+          top: 16px;
+          right: 28px;
+          opacity: 0;
+          visibility: hidden;
+          margin: 0;
+          padding: 0 8px;
+          background-color: #fff;
+          list-style: none;
+          border-radius: 10px;
+          position: absolute;
+          width: max-content;
+          z-index: 20;
+          transition: opacity 0.2s ease, visibility 0.2s ease;
+          border: 1px solid #ebeef5;
+          box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+
+          .btn {
+            height: 30px;
+            // width: 100%;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: left;
+            border: none;
+            outline: none;
+            padding: 0 12px;
+            margin: 0;
+            background-color: #fff;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #4e5b6a;
+            cursor: pointer;
+            &:hover {
+              background-color: #ece7fe;
+            }
+          }
+          &--active {
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+      }
     }
     .number {
       display: flex;
@@ -429,7 +327,8 @@ export default {};
           display: flex;
           img {
           }
-          pre {
+          span {
+            margin-left: 8px;
           }
         }
       }

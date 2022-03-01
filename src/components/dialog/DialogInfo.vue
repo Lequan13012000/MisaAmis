@@ -14,7 +14,15 @@
               <div class="title">Ảnh đại diện</div>
               <div class="image-container">
                 <img
-                  src="https://sisapapp.misacdn.net/lms/img/toan1.5b5ad581.png"
+                  v-if="imageSubject"
+                  :src="imageSubject"
+                  alt=""
+                  class="image"
+                  ref="avatar"
+                />
+                <img
+                  v-else
+                  src="../../assets/subjects-avatar/default.png"
                   alt=""
                   class="image"
                 />
@@ -25,7 +33,16 @@
                       alt=""
                     />
                   </label>
-                  <input type="file" class="change-avatar" />
+                  <!-- <input type="file" class="change-avatar" /> -->
+                   <input
+                type="file"
+                accept="image/*"
+                class="avatar-input"
+                name="avatar-input"
+                id="avatar-input"
+                ref="exerciseAvatar"
+                @change="handleChangeExerciseAvatar"
+              />
                 </div>
               </div>
             </div>
@@ -33,18 +50,18 @@
               <div class="ms-text-field">
                 <label for="" class="ms-label">Tên bài tập</label>
                 <BaseInput
-                  v-model="fakeExercise.ExrciseName"
+                  v-model="fakeExercise.exerciseName"
                   :class="{
                     errorvalidate:
-                      errorsObj.ExcriseName.length > 0 &&
-                      !fakeExercise.ExrciseName,
+                      errorsObj.ExerciseName.length > 0 &&
+                      !fakeExercise.exerciseName,
                   }"
                 />
                 <span
                   class="error-msg"
                   v-if="
-                    errorsObj.ExcriseName.length > 0 &&
-                    !fakeExercise.ExrciseName
+                    errorsObj.ExerciseName.length > 0 &&
+                    !fakeExercise.exerciseName
                   "
                   >Không được bỏ trống</span
                 >
@@ -54,21 +71,22 @@
                   <label for="" class="ms-label">Môn</label>
                   <BaseCombobox
                     :dataOptions="subjects"
-                    fieldValue="SubjectId"
-                    fieldDisplay="SubjectName"
+                    fieldValue="subjectId"
+                    fieldDisplay="subjectName"
                     placeholder="Chọn môn"
-                    v-model="fakeExercise.SubjectId"
+                    v-model="fakeExercise.subjectId"
                     :class="{
                       errorcombobox:
                         errorsObj.SubjectName.length > 0 &&
                         !fakeExercise.SubjectId,
                     }"
+                    @changeData="getSelectedSubject"
                   />
                   <span
                     class="error-msg"
                     v-if="
                       errorsObj.SubjectName.length > 0 &&
-                      !fakeExercise.SubjectId
+                      !fakeExercise.subjectId
                     "
                     >Không được bỏ trống</span
                   >
@@ -77,19 +95,20 @@
                   <label for="" class="ms-label">Khối</label>
                   <BaseCombobox
                     :dataOptions="grades"
-                    fieldValue="GradeId"
-                    fieldDisplay="GradeName"
+                    fieldValue="gradeId"
+                    fieldDisplay="gradeName"
                     placeholder="Chọn khối"
-                    v-model="fakeExercise.GradeId"
+                    v-model="fakeExercise.gradeId"
                     :class="{
                       errorcombobox:
-                        errorsObj.GradeName.length > 0 && !fakeExercise.GradeId,
+                        errorsObj.GradeName.length > 0 && !fakeExercise.gradeId,
                     }"
+                    @changeData="getSelectedGrade"
                   />
                   <span
                     class="error-msg"
                     v-if="
-                      errorsObj.GradeName.length > 0 && !fakeExercise.GradeId
+                      errorsObj.GradeName.length > 0 && !fakeExercise.gradeId
                     "
                     >Không được bỏ trống</span
                   >
@@ -97,7 +116,12 @@
               </div>
               <div class="ms-combo-box">
                 <label for="" class="ms-label">Chủ đề</label>
-                <BaseCombobox placeholder="Chọn chủ đề" />
+                <BaseCombobox
+                  :dataOptions="topics"
+                  fieldValue="topicId"
+                  fieldDisplay="topicName"
+                  placeholder="Chọn chủ đề"
+                />
               </div>
               <div class="ms-suggest-tag-input">
                 <label for="" class="ms-label">Thẻ tìm kiếm</label>
@@ -118,7 +142,7 @@
       </div>
       <div class="el-dialog__footer">
         <div class="dialog-toolbar">
-          <BaseButton @click.native="showHideDialog">Đóng</BaseButton>
+          <BaseButton @click.native="resetEditExercise">Đóng</BaseButton>
           <!-- <router-link to="/storage/createv2"> -->
           <BaseButton class="composing-button" @click.native="checkForm"
             >Lưu</BaseButton
@@ -149,6 +173,46 @@ export default {
     // thẻ tìm kiếm
     // VoerroTagsInput,
   },
+  created() {
+    this.$store.dispatch("grades/loadGrade");
+    this.$store.dispatch("subjects/loadSubject");
+  },
+  mounted() {
+    const exerciseAvatar =
+      this.$store.state.exercise.exercise.avatar;
+
+    // const subjectAvatar =
+    //   this.$store.state.exercise.exercise.subjectAvatar;
+
+    const avatarFile = this.$store.state.exercise.exercise.avatarFile;
+
+    if (exerciseAvatar) {
+      // if exercise detail has avatar url => set default avater to that avatar
+      this.imageSubject = exerciseAvatar;
+      // if (exerciseAvatar.indexOf("ExerciseAvatars") > -1) {
+      //   // if exercise avatar wasn't setted by subject avatar => set isChangeAvatar to true
+      //   this.isChangeAvatar = true;
+      // }
+      this.isChangeAvatar = true;
+    } else if (avatarFile) {
+      // else if avatar file is set => defaultAvatar = avatar file
+      this.imageSubject = URL.createObjectURL(avatarFile);
+      this.isChangeAvatar = true;
+    }
+    else{
+      this.imageSubject = 'https://localhost:7051/image/default.png';
+    }
+    //  else if (subjectAvatar) {
+    //   // else set defaultAvatar to subject avatar
+    //   this.imageSubject = subjectAvatar;
+    // }
+
+    // filter topics and tags
+    // this.filterTopicsAndTags();
+
+    // focus on exercise name input
+    // this.$refs.exerciseNameInput.focus();
+  },
   data() {
     return {
       selectedTags: "",
@@ -156,22 +220,42 @@ export default {
       isShowHideDialog: false,
       // validate
       errorsObj: {
-        ExcriseName: [],
+        ExerciseName: [],
         SubjectName: [],
         GradeName: [],
       },
 
       fakeExercise: {
-        ExrciseName: "",
-        SubjectId: null,
-        GradeId: null,
+        exerciseName: "",
+        subjectId: null,
+        gradeId: null,
+        gradeName: "",
+        subjectName: "",
+        questions: [],
+        avatar: "",
       },
+      // ảnh theo môn
+      imageSubject: "",
+      // phân biệt sửa thêm bài tập
+      isEditExercise: false,
+        /**
+       * default avatar url
+       * @author: BMThang(25/01/2022)
+       */
+      defaultAvatar: "",
+
+      /**
+       * is change avatar
+       * @author: BMThang(25/01/2022)
+       */
+      isChangeAvatar: false,
     };
   },
   computed: {
     ...mapState("subjects", ["subjects"]),
     ...mapState("grades", ["grades"]),
-    ...mapState("exercise", ["exercise"])
+    ...mapState("exercise", ["exercise"]),
+    ...mapState("topics", ["topics"]),
   },
 
   methods: {
@@ -183,32 +267,49 @@ export default {
       this.isShowHideDialog = !this.isShowHideDialog;
     },
     /**
+     * Ẩn hiện dialog
+     * CreatedBy: LEQUAN (28/01/2022)
+     */
+    resetEditExercise() {
+      this.isShowHideDialog = !this.isShowHideDialog;
+      this.isEditExercise = false;
+    },
+    /**
      * Hàm xử lí validate dữ liệu
      * Created by : LEQUAN (12/2/2022)
      */
     checkForm: function (e) {
+      const exercise = { ...this.fakeExercise };
       this.errorsObj = {
-        ExcriseName: [],
+        ExerciseName: [],
         SubjectName: [],
         GradeName: [],
       };
-      if (!this.fakeExercise.ExrciseName) {
-        this.errorsObj.ExcriseName.push("ExcriseName required.");
+      if (!this.fakeExercise.exerciseName) {
+        this.errorsObj.ExerciseName.push("ExcriseName required.");
       }
 
-      if (!this.fakeExercise.SubjectId) {
+      if (!this.fakeExercise.subjectId) {
         this.errorsObj.SubjectName.push("SubjectName required.");
       }
-      if (!this.fakeExercise.GradeId) {
+      if (!this.fakeExercise.gradeId) {
         this.errorsObj.GradeName.push("GradeName required.");
       }
       if (
-        !this.errorsObj.ExcriseName.length &&
+        !this.errorsObj.ExerciseName.length &&
         !this.errorsObj.SubjectName.length &&
         !this.errorsObj.GradeName.length
       ) {
-        this.saveDataExercise(this.fakeExercise);
-        this.$router.push("/storage/createv2");
+        if (this.isEditExercise) {
+          this.isShowHideDialog = false;
+          this.fakeExercise.subjectName = this.exercise.subjectName;
+          this.fakeExercise.gradeName = this.exercise.gradeName;
+          this.fakeExercise.avatar = this.exercise.avatar;
+        } else {
+          this.$router.push("/storage/createv2");
+          this.exercise.questions = [];
+        }
+        this.saveDataExercise(exercise);
       }
       e.preventDefault();
     },
@@ -217,9 +318,53 @@ export default {
      * CreatedBy: LEQUAN(14/02/2022)
      */
     // ...mapMutations["exercise",["saveDataExercise"]]
-    saveDataExercise(){
-      this.$store.commit("exercise/saveDataExercise")
-    }
+    saveDataExercise(data) {
+      // this.$store.commit("exercise/saveDataExercise");
+      this.$store.dispatch("exercise/saveFakeExercise", data);
+    },
+    getSelectedSubject(data) {
+   
+      this.fakeExercise.subjectName = data?.subjectName;
+      this.imageSubject = data?.image;
+      this.fakeExercise.avatar = data?.image;
+       this.fakeExercise.avatarFile = null;
+      if (this.fakeExercise.gradeId && this.fakeExercise.subjectId) {
+        this.$store.dispatch("topics/loadTopic", {
+          gradeId: this.fakeExercise.gradeId,
+          subjectId: this.fakeExercise.subjectId,
+        });
+      } else {
+        this.$store.commit("topics/setTopic", []);
+      }
+    },
+    getSelectedGrade(data) {
+      this.fakeExercise.gradeName = data?.gradeName;
+      if (this.fakeExercise.gradeId && this.fakeExercise.subjectId) {
+        this.$store.dispatch("topics/loadTopic", {
+          gradeId: this.fakeExercise.gradeId,
+          subjectId: this.fakeExercise.subjectId,
+        });
+      } else {
+        this.$store.commit("topics/setTopic", []);
+      }
+    },
+    /**
+     * display uploaded image after user upload image
+     */
+    handleChangeExerciseAvatar() {
+  
+      if (this.$refs.exerciseAvatar.files[0]) {
+        // set is change avatar to true
+        this.isChangeAvatar = true;
+
+        // display selected avatar
+        this.$refs.avatar.src = URL.createObjectURL(
+          this.$refs.exerciseAvatar.files[0]
+        );
+        console.log(this.$refs.exerciseAvatar.files[0])
+         this.fakeExercise.avatarFile = this.$refs.exerciseAvatar.files[0];
+      }
+    },
   },
 };
 </script>

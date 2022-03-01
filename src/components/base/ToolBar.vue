@@ -65,13 +65,65 @@ export default {
      * Click chọn loại câu hỏi
      * CreatedBy:LEQUAN(11/02/2022)
      */
-    // ...mapMutations["showHideQuestionType","questionType"]
     showHideQuestionType(value) {
-      this.$store.commit("questionType/showHideQuestionType",value);
+      let newAnswer = [];
+      const idx = null
+      this.$store.commit("questionType/questionType", value);
+      switch (value) {
+        case 1:
+          newAnswer = [
+            {
+              content: "",
+              incorrect: false,
+            },
+            {
+              content: "",
+              incorrect: false,
+            },
+            {
+              content: "",
+              incorrect: false,
+            },
+            {
+              content: "",
+              incorrect: false,
+            },
+          ];
+          console.log(newAnswer);
+          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          return;
+        case 2:
+          newAnswer = [
+            {
+              content: "Đúng",
+              incorrect: false,
+            },
+            {
+              content: "Sai",
+              incorrect: false,
+            },
+          ];
+          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          return;
+        case 3:
+          newAnswer = [
+            {
+              content: "",
+              incorrect: true,
+            },
+          ];
+          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          return;
+           case 4:
+          this.$store.commit("questionType/showHideQuestionType",{value,idx});
+          return;
+        default:
+          return;
+      }
     },
-    questionType(){
-       this.$store.commit("questionType/questionType");
-    }
+    questionType() {
+      this.$store.commit("questionType/questionType");
+    },
   },
   computed: {
     ...mapState("questionType", ["selectQuestion"]),

@@ -1,3 +1,4 @@
+import axios from 'axios'
 const subjects = {
     namespaced: true,
     state: {
@@ -14,6 +15,18 @@ const subjects = {
             SubjectId: 4,
             SubjectName: 'Ngữ Văn',
         }]
+    },
+    actions: {
+        loadSubject({ commit }) {
+            axios.get('https://localhost:7051/api/Subjects').then((response) => {
+                commit('getSubject', response.data)
+            })
+        }
+    },
+    mutations: {
+        getSubject(state, data) {
+            state.subjects = data;
+        },
     }
 }
 export default subjects

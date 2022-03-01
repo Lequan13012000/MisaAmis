@@ -2,15 +2,10 @@
   <div class="compose-dialog__answer">
     <div class="grid">
       <div class="fill-answer">
-        <div class="answer">
-          <div class="answer-index">Ô trống 1</div>
+        <div class="answer" v-for="(answer,index) in value" :key="index">
+          <div class="answer-index"></div>
           <div class="ms-tag-input">
-            <VoerroTagsInput
-              element-id="tags"
-              v-model="selectedTags"
-              :typeahead="true"
-              placeholder="Nhập đáp án rồi nhấn Enter..."
-            ></VoerroTagsInput>
+          <FillBlankAnswerBox :value="answer.content" :idx="index" @input="handleInput" @onDelete="onDelete(index)" />
           </div>
         </div>
       </div>
@@ -19,18 +14,38 @@
 </template>
 
 <script>
-import VoerroTagsInput from "@voerro/vue-tagsinput";
-
+// import VoerroTagsInput from "@voerro/vue-tagsinput";
+import FillBlankAnswerBox from "../base/FillBlankAnswerBox.vue"
 // require("@voerro/vue-tagsinput/dist/style.css");
 
 export default {
   data() {
-    return {
-      selectedTags: [],
-    };
+    return {};
   },
   components: {
-    VoerroTagsInput,
+    FillBlankAnswerBox
+  },
+  props: {
+    value: {
+      type: Array,
+      default:() =>[],
+    },
+
+  },
+  methods: {
+    handleInput(value,index) {
+      const newanswers = [...this.value];
+      const newanswer = { ...this.value[index] };
+      newanswers.splice(index, 1, { ...newanswer, content: value });
+      this.$emit("input", newanswers);
+    },
+    /**
+     * Hàm xóa đáp án
+     * CreatedBy:LEQUAN(22/2/2022)
+     */
+    onDelete(index){
+      this.$emit('onDelete', index);
+    }
   },
 };
 </script>

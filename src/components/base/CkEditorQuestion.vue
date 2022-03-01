@@ -1,8 +1,9 @@
 <template>
   <ckeditor
     :editor="editor"
-    v-model="editorData"
+    :value="value"
     :config="editorConfig"
+    @input="handleInput"
   ></ckeditor>
 </template>
 
@@ -17,11 +18,23 @@ export default {
   data() {
     return {
       editor: ClassicEditor,
-      editorData: "<p>Nhập đáp án...</p>",
+      editorData: "",
       editorConfig: {
         // The configuration of the editor.
+        placeholder: "Nhập câu hỏi tại đây...",
       },
     };
+  },
+  props: {
+    value: {
+      type: String,
+      default: "",
+    },
+  },
+  methods: {
+    handleInput(value) {
+      this.$emit("input", value);
+    },
   },
 };
 </script>

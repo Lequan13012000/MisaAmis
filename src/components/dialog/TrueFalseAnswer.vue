@@ -3,37 +3,30 @@
     <div class="select-answer">
       <div class="grid">
         <div></div>
-        <div class="select">
+        <div class="select" v-for="(answer, index) in value" :key="index">
           <div class="thumbnail-lazy" style="background-color: #afeca4">
-            <textarea
-              name=""
-              id=""
-              cols="30"
-              rows="1"
-              style="background-color: #afeca4"
-            >Đúng</textarea
-            >
+            <div class="ck-editor-custom">
+              <CKEditor
+                :value="answer.content"
+                @input="handleInput"
+                :index="index"
+              />
+            </div>
             <div class="head">
-              <div class="index">A</div>
+              <div class="index">{{ convertIndexToCharacter(index) }}</div>
               <div class="right">
-                <div class="toolbar-icon">
+                <div
+                  class="toolbar-icon"
+                  :class="{ correct_answer: answer.incorrect == true }"
+                  @click="correctAnswer(index)"
+                >
                   <img
-                    src="https://sisapapp.misacdn.net/lms/img/ic_uncheck.da5a285c.svg"
+                    v-if="answer.incorrect == true"
+                    src="https://sisapapp.misacdn.net/lms/img/ic_check.3cdf2053.svg"
                     alt=""
                   />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="select">
-          <div class="thumbnail-lazy">
-            <textarea name="" id="" cols="30" rows="1">Sai</textarea>
-            <div class="head">
-              <div class="index">B</div>
-              <div class="right">
-                <div class="toolbar-icon">
                   <img
+                    v-else
                     src="https://sisapapp.misacdn.net/lms/img/ic_uncheck.da5a285c.svg"
                     alt=""
                   />
@@ -50,16 +43,61 @@
 
 <script>
 import "../../element-variables.scss";
+import CKEditor from "../base/CkEditor.vue";
 export default {
-  components: {},
+  components: { CKEditor },
   data() {
     return {};
   },
-  methods: {},
+  props: {
+    value: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  methods: {
+    /**
+     * hàm lấy  chuyển số thành chữ
+     * CreatedBy: LEQUAN (15/02/2022)
+     */
+    convertIndexToCharacter(number) {
+      return String.fromCharCode(number + 65);
+    },
+    /**
+     * hàm lấy  chuyển số thành chữ
+     * CreatedBy: LEQUAN (15/02/2022)
+     */
+    handleInput(index, value) {
+      const newanswers = [...this.value];
+      const newanswer = { ...this.value[index] };
+      newanswers.splice(index, 1, { ...newanswer, content: value });
+      this.$emit("input", newanswers);
+    },
+    /**
+     * hàm chọn đáp án đúng
+     *  CreatedBy: LEQUAN (15/02/2022)
+     */
+    correctAnswer(idx) {
+      const correctAnswers = [...this.value];
+      const correctAnswer = correctAnswers.map((answer,index) => {
+        if(index == idx){
+          return {...answer,incorrect:true}
+        }
+        else{
+          return {...answer,incorrect:false}
+        }
+      })
+      console.log(correctAnswer)
+      this.$emit("input", correctAnswer);
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.correct_answer {
+  background-color: #2dd866 !important;
+}
 .el-overlay-dynamic {
   z-index: 2451;
   position: fixed;
@@ -172,37 +210,70 @@ export default {
                       top: 0;
                       left: 0;
                       width: 100%;
-                      height: 100%;
+                      height: calc(100% - 54px);
                       z-index: 1;
                       background: no-repeat 50%;
-                      //   padding: 48px 8px;
+                      padding-top: 48px;
                       padding-bottom: 12px;
                       display: flex !important;
                       justify-content: center;
                       align-items: center;
-                      background-color: #ffaec7;
-                      textarea {
-                        resize: none;
-                        width: 92%;
-                        // height: 77%;
-                        margin-top: 43px;
-                        border: none;
-                        border-radius: 9px;
-                        text-align: center;
-                        overflow: hidden;
-                        font-size: 24px;
-                        font-weight: 700;
-                        color: #4e5b6a;
-                        &::placeholder {
-                          left: 30%;
-                          position: absolute;
-                          top: 40%;
-                        }
-                        background-color: #ffaec7;
-                        &:focus {
-                          outline: none;
+                      background-color: rgb(255, 214, 240);
+                      padding-bottom: 16px;
+
+                      .ck-editor-custom {
+                        height: 100%;
+                        width: 100%;
+                        padding-left: 12px;
+                        padding-right: 12px;
+
+                        ::v-deep .ck.ck-editor {
+                          position: relative;
+                          width: 100%;
+                          height: 100%;
+                          background: transparent;
+
+                          .ck.ck-reset_all {
+                            display: none;
+                          }
+                          .ck-editor__main {
+                            height: 100%;
+                          }
+                          .ck.ck-editor__main > .ck-editor__editable {
+                            text-align: center;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            height: 100%;
+                            overflow: hidden;
+                            border-radius: 10px;
+                            background: transparent;
+                          }
                         }
                       }
+
+                      // textarea {
+                      //   resize: none;
+                      //   width: 92%;
+                      //   height: 77%;
+                      //   margin-top: 43px;
+                      //   border: none;
+                      //   border-radius: 9px;
+                      //   text-align: center;
+                      //   &::placeholder {
+                      //     left: 30%;
+                      //     position: absolute;
+                      //     top: 40%;
+                      //   }
+                      //   background-color: #ffd6f0;
+                      //   &:focus {
+                      //     outline: none;
+                      //     background-color: #ffff;
+                      //     &::placeholder {
+                      //       color: transparent;
+                      //     }
+                      //   }
+                      // }
 
                       .head {
                         position: absolute;

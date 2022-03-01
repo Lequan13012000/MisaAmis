@@ -1,4 +1,6 @@
+import axios from 'axios'
 const grades = {
+
     namespaced: true,
     state: {
         grades: [{
@@ -17,6 +19,18 @@ const grades = {
             GradeId: 4,
             GradeName: 'Khối 4'
         }]
+    },
+    actions: {
+        loadGrade({commit}) {
+            axios.get('https://localhost:7051/api/Grades').then((response) => {
+                commit('getGrade', response.data)
+            })
+        }
+    },
+    mutations: {
+        getGrade(state, data) {
+            state.grades = data;
+        },
     }
 }
 export default grades

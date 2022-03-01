@@ -27,6 +27,10 @@ const questionType = {
                 label: 'Câu hỏi nhóm',
             },
         ],
+        answers: [],
+        content:"",
+        index:null,
+        attachments:[],
         // data kiểu câu hỏi được chọn
         selectQuestion: 1,
         // ẩn hiện questiontype
@@ -42,10 +46,19 @@ const questionType = {
          * Ẩn form combobox chọn loại câu hỏi
          * CreateBy:LEQUAN(11/2/2022)
          */
-        showHideQuestionType(state, value) {
+        showHideQuestionType(state, payload) {
+        
             state.isShowQuestionType = !state.isShowQuestionType;
-            state.selectQuestion = value;
+            state.selectQuestion = payload?.value;
+            state.answers = payload?.newAnswer;
+            state.content = payload?.newQuestion;
+            state.index = payload?.index;
+            state.attachments = payload?.attachments;
         },
+
+        hiddenQuestionType(state) {
+            state.isShowQuestionType = false;
+        }
     }
 }
 export default questionType

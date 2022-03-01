@@ -27,7 +27,7 @@
       </div>
     </div>
     <div class="m-content">
-      <div style="height: 100%">
+      <div style="height: 100%; overflow: auto">
         <div class="storage-container">
           <div class="title-storage">
             <div class="title-storage-left">
@@ -49,25 +49,29 @@
               <div class="m-combobox">
                 <BaseCombobox
                   :dataOptions="grades"
-                  fieldValue="GradeCode"
-                  fieldDisplay="GradeName"
+                  fieldValue="gradeId"
+                  fieldDisplay="gradeName"
                   placeholder="Tất cả các khối"
+                  @changeData="topicSelected"
+                  v-model="gradeIdSelected"
                 />
               </div>
               <div class="m-combobox">
                 <BaseCombobox
                   :dataOptions="subjects"
-                  fieldValue="SubjectCode"
-                  fieldDisplay="SubjectName"
+                  fieldValue="subjectId"
+                  fieldDisplay="subjectName"
                   placeholder="Tất cả các môn"
                   ref="comboboxSubject"
+                  @changeData="topicSelected"
+                  v-model="subjectIdSelected"
                 />
               </div>
               <div class="m-combobox">
                 <BaseCombobox
                   :dataOptions="topics"
-                  fieldValue="TopicId"
-                  fieldDisplay="TopicName"
+                  fieldValue="topicId"
+                  fieldDisplay="topicName"
                   placeholder="Tất cả chủ đề"
                 />
               </div>
@@ -75,7 +79,9 @@
                 <BaseCombobox placeholder="Tất cả học liệu" />
               </div>
             </div>
-            <div class="title-storage-right"><BaseInputSearch /></div>
+            <div class="title-storage-right">
+              <BaseInputSearch v-model="searchText" @keydown="topicSelected" />
+            </div>
           </div>
           <div class="excercises-container">
             <div class="grid-view"><BaseGridView /></div>
@@ -106,21 +112,57 @@ export default {
     // popup bổ sung thông tin
     DialogInfo,
   },
+  created() {
+    this.$store.dispatch("grades/loadGrade");
+    this.$store.dispatch("subjects/loadSubject");
+    /*this.$store.dispatch("topics/loadTopic");*/
+  },
+  watch: {},
   data() {
     return {
       placeholder: "",
-      topics: [],
+      // topics: [],
+      gradeIdSelected: null,
+      subjectIdSelected: null,
+      searchText: null,
     };
   },
   computed: {
     ...mapState("subjects", ["subjects"]),
     ...mapState("grades", ["grades"]),
+    ...mapState("exercise", ["exercise"]),
+    ...mapState("topics", ["topics"]),
   },
   methods: {
     // Ẩn hiện dialog bổ sung thông tin
     showHideDialog() {
       this.$refs.childDialogInfo.isShowHideDialog =
         !this.$refs.childDialogInfo.isShowHideDialog;
+    },
+    topicSelected() {
+      this.$store.dispatch("exerciseList/loadExercise", {
+        searchText: this.searchText,
+        gradeId: this.gradeIdSelected,
+        subjectId: this.subjectIdSelected,
+        topicId: this.topicIdSelected,
+      });
+      if (this.gradeIdSelected && this.subjectIdSelected) {
+        this.$store.dispatch("topics/loadTopic", {
+          gradeId: this.gradeIdSelected,
+          subjectId: this.subjectIdSelected,
+        });
+      } else {
+        this.$store.commit("topics/setTopic", []);
+      }
+    },
+    /**
+     * Tìm kiếm theo Tên
+     * CreatedBy:LEQUAN(25/02/2022)
+     */
+    seachExercise() {
+      setTimeout(() => {
+        this.topicSelected(this.searchText);
+      }, 2000);
     },
   },
 };
