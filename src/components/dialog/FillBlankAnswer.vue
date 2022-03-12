@@ -61,6 +61,7 @@ export default {
   --tw-bg-opacity: 1;
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
   margin-top: 1rem;
+      height: 262px;
   .grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -73,8 +74,8 @@ export default {
         display: flex;
         align-items: center;
         .answer-index {
-          width: 5rem;
-          margin-right: 0.5rem;
+          // width: 5rem;
+          // margin-right: 0.5rem;
         }
       }
       .ms-tag-input {

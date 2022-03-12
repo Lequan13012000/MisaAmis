@@ -1,11 +1,15 @@
 <template>
   <div id="app">
-    <router-view />
+       <TheContainer />
   </div>
 </template>
 <script>
+import TheContainer from "./components/layout/TheContainer.vue";
 export default {
   name: "App",
+    components: {
+    TheContainer
+  },
 };
 </script>
 <style lang="scss">

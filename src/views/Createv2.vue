@@ -96,14 +96,17 @@ export default {
   },
   data() {
     return {
-    
       exerciseData: { ...this.$store.state.exercise.exercise },
     };
   },
   mounted() {
+    this.$store.commit("loading/openLoading");
     const exerciseId = this.$route.params.id;
     if (exerciseId !== "createv2") {
       this.$store.dispatch("exercise/loadExerciseSelected", exerciseId);
+      setTimeout(() => {
+        this.$store.commit("loading/closeLoading");
+      },500);
     }
   },
   watch: {
@@ -116,9 +119,8 @@ export default {
     ...mapMutations("composeQuestion", ["showComposeHideToolBar"]),
     // Ẩn hiện dialog bổ sung thông tin
     showHideDialog() {
-   
+      this.$store.commit("loading/openLoading");
       // const exercise = this.exercise;
-
       this.$refs.childDialogInfo.isShowHideDialog =
         !this.$refs.childDialogInfo.isShowHideDialog;
       // chỉ định sửa bài tập
@@ -126,12 +128,24 @@ export default {
       // truyền thông tin bài tập lên form
       this.$refs.childDialogInfo.fakeExercise.exerciseName =
         this.exercise.exerciseName;
-      this.$refs.childDialogInfo.fakeExercise.subjectId = this.exercise.subjectId;
+      this.$refs.childDialogInfo.fakeExercise.subjectId =
+        this.exercise.subjectId;
       this.$refs.childDialogInfo.fakeExercise.subjectName =
         this.exercise.subjectName;
       this.$refs.childDialogInfo.fakeExercise.gradeId = this.exercise.gradeId;
-      this.$refs.childDialogInfo.fakeExercise.gradeName = this.exercise.gradeName;
-          this.$refs.childDialogInfo.fakeExercise.avatar = this.exercise.avatar;
+      this.$refs.childDialogInfo.fakeExercise.gradeName =
+        this.exercise.gradeName;
+       this.$refs.childDialogInfo.fakeExercise.topicIds = this.exercise.topicIds;
+      this.$refs.childDialogInfo.fakeExercise.avatar = this.exercise.avatar;
+      this.$refs.childDialogInfo.fakeExercise.questions = this.exercise.questions;
+      this.$refs.childDialogInfo.fakeExercise.parentQuestions = this.exercise.parentQuestions;
+      this.$store.dispatch("topics/loadTopic",{
+        gradeId: this.exercise.gradeId,
+        subjectId: this.exercise.subjectId
+      })
+      setTimeout(() => {
+        this.$store.commit("loading/closeLoading");
+      }, 300);
     },
     backShowComposeHideToolBar() {
       this.$store.commit("composeQuestion/backShowComposeHideToolBar");

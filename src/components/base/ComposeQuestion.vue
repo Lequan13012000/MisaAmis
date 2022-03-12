@@ -4,16 +4,16 @@
       <div class="container">
         <div
           class="compose-question"
-          v-for="(compose, index) in exercise.questions"
+          v-for="(compose, index) in formattedQuestions"
           :key="index"
         >
-          <div class="question">
+          <div class="question" v-if="compose">
             <div class="question__decore"></div>
             <div class="question_detail">
               <div class="question__content">
                 <div class="content">
                   <div class="content__content">
-                    <div class="content__index">{{ index + 1 }}.</div>
+                    <div class="content__index">{{ compose.number }}.</div>
                     <div class="content_text">
                       <div class="ckeditor-custom">
                         <div class="content-editor">
@@ -23,28 +23,89 @@
                     </div>
                   </div>
                   <div class="content__attachments">
-                    <div class="ms-preview-container">
+                    <div
+                      class="ms-preview-container"
+                      v-for="(attach, index) in compose.attachments"
+                      :key="index"
+                    >
                       <img
-                        src="https://sisap.vn/lms/apis/file//v1/files/download?FileID=6e55b17a-9253-4e20-bcd8-9de14e8fcdc5&StorageType=105&OwnerID=83ba3221-36df-4889-aed9-b47013427098&IsPreview=true&ClientFileName=&Width=300"
-                        alt=""
+                        v-if="true"
+                        :src="attach.src"
+                        :alt="attach.name"
                         class="image-item"
                       />
                     </div>
                   </div>
+                     <div class="question__answers">
+                      <div class="answers">
+                        <div
+                          class="answer"
+                          :class="{ answer_correct: answer.incorrect }"
+                          v-for="(answer, index) in compose.answers"
+                          :key="index"
+                        >
+                          <div class="answer__index">
+                            {{ convertIndexToCharacter(index) }}
+                          </div>
+                          <div
+                            class="ckeditor-custom"
+                            v-html="answer.content"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
               </div>
-              <div class="question__answers">
-                <div class="answers">
-                  <div
-                    class="answer"
-                    :class="{ answer_correct: answer.incorrect }"
-                    v-for="(answer, index) in compose.answers"
-                    :key="index"
-                  >
-                    <div class="answer__index">
-                      {{ convertIndexToCharacter(index) }}
+              <div class="question_group" v-if="compose.type == 5">
+                <div class="question" v-for="(question,index) in compose.questions" :key="index">
+                  <div class="question_detail">
+                    <div class="question__content">
+                      <div class="content">
+                        <div class="content__content">
+                          <div class="content__index">{{ question.number }}.</div>
+                          <div class="content_text">
+                            <div class="ckeditor-custom">
+                              <div class="content-editor">
+                                <p v-html="question.content"></p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="content__attachments">
+                          <div
+                            class="ms-preview-container"
+                            v-for="(attach, index) in question.attachments"
+                            :key="index"
+                          >
+                            <img
+                              v-if="true"
+                              :src="attach.src"
+                              :alt="attach.name"
+                              class="image-item"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div class="ckeditor-custom" v-html="answer.content"></div>
+                    <div class="question__answers">
+                      <div class="answers">
+                        <div
+                          class="answer"
+                          :class="{ answer_correct: answer.incorrect }"
+                          v-for="(answer, index) in question.answers"
+                          :key="index"
+                        >
+                          <div class="answer__index">
+                            {{ convertIndexToCharacter(index) }}
+                          </div>
+                          <div
+                            class="ckeditor-custom"
+                            v-html="answer.content"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -61,7 +122,7 @@
                         alt="" /></span
                   ></BaseButton>
                   <BaseButton
-                    @click.native="clickDeleteQuestion(index)"
+                    @click.native="clickDeleteQuestion(compose.sortOrder, compose.type)"
                     style="width: 48px"
                     ><span
                       ><img
@@ -112,7 +173,7 @@
             class="question_icon"
           />
         </div>
-        <div class="question">
+        <div class="question" @click="showHideQuestionType(5)">
           <img
             src="https://sisapapp.misacdn.net/lms/img/group.447cc2ea.svg"
             alt=""
@@ -121,18 +182,138 @@
         </div>
       </div>
     </div>
+    <confirmDeletePopup />
   </div>
 </template>
 <script>
 import BaseButton from "../base/BaseButton.vue";
 import { mapState } from "vuex";
+import CommonJS from "../../scripts/commonJS";
+import confirmDeletePopup from "../common/ConfirmDeletePopup.vue";
 export default {
   components: {
     // component button
     BaseButton,
+    confirmDeletePopup,
   },
   computed: {
     ...mapState("exercise", ["exercise"]),
+    //formattedQuestions() {
+    // if (this.$store.state.exercise.exercise.questions) {
+    //   return this.$store.state.exercise.exercise.questions.map((question) => {
+    //     const attachments = CommonJS.formattedAttachments(
+    //       question.attachments
+    //     );
+    //     return { ...question, attachments };
+    //   });
+    // }
+    // return null;
+    //},
+    formattedQuestions() {
+      if (this.$store.state.exercise.exercise.questions) {
+        const exerciseData = JSON.parse(
+          JSON.stringify(this.$store.state.exercise.exercise)
+        );
+        const newQuestions = [];
+        for (let index = 0; index < exerciseData.questions.length; index++) {
+          const question = exerciseData.questions[index];
+          question.attachments = CommonJS.formattedAttachments(
+            question.attachments
+          );
+          if (question.parentId !== null && question.parentId !== undefined) {
+            // is a child question if parent question
+            if (
+              exerciseData.questions[index - 1]?.parentId === question.parentId
+            ) {
+              // if parent question has added to new question => find it and add child question to parent question
+              const founedQuestion = newQuestions.find(
+                (parentQuestion) => parentQuestion?.id === question.parentId
+              );
+              founedQuestion.questions.push({ ...question });
+
+              // if parent question is not active number => push null element to question list to increment index of question list
+              if (!founedQuestion.isActiveNumber) {
+                newQuestions.push(null);
+              }
+            } else {
+              // this question is the first child of parent question => find parent question in parent question list
+              const parentQuestion = exerciseData.parentQuestions.find(
+                (parentQuestion) => parentQuestion.id === question.parentId
+              );
+
+              // push new question to new questions with type is group question
+              newQuestions.push({
+                ...parentQuestion,
+                questions: [
+                  {
+                    ...question,
+                  },
+                ],
+                attachments: CommonJS.formattedAttachments(
+                  parentQuestion.attachments
+                ),
+                type: 5,
+              });
+            }
+          } else {
+            // is a normal question => push it to new question list
+            newQuestions.push({ ...question });
+          }
+        }
+        return newQuestions;
+      }
+      return null;
+    },
+
+    formattedQuestionsData() {
+       if (this.$store.state.exercise.exercise.questions) {
+        const exerciseData = JSON.parse(
+          JSON.stringify(this.$store.state.exercise.exercise)
+        );
+        const newQuestions = [];
+        for (let index = 0; index < exerciseData.questions.length; index++) {
+          const question = exerciseData.questions[index];
+          if (question.parentId !== null && question.parentId !== undefined) {
+            // is a child question if parent question
+            if (
+              exerciseData.questions[index - 1]?.parentId === question.parentId
+            ) {
+              // if parent question has added to new question => find it and add child question to parent question
+              const founedQuestion = newQuestions.find(
+                (parentQuestion) => parentQuestion?.id === question.parentId
+              );
+              founedQuestion.questions.push({ ...question });
+
+              // if parent question is not active number => push null element to question list to increment index of question list
+              if (!founedQuestion.isActiveNumber) {
+                newQuestions.push(null);
+              }
+            } else {
+              // this question is the first child of parent question => find parent question in parent question list
+              const parentQuestion = exerciseData.parentQuestions.find(
+                (parentQuestion) => parentQuestion.id === question.parentId
+              );
+
+              // push new question to new questions with type is group question
+              newQuestions.push({
+                ...parentQuestion,
+                questions: [
+                  {
+                    ...question,
+                  },
+                ],
+                type: 5,
+              });
+            }
+          } else {
+            // is a normal question => push it to new question list
+            newQuestions.push({ ...question });
+          }
+        }
+        return newQuestions;
+      }
+      return null;
+    }
   },
   methods: {
     // saveComposeQuestion(){
@@ -150,7 +331,9 @@ export default {
      * CreatedBy:LEQUAN(11/02/2022)
      */
     showHideQuestionType(value) {
+      this.$store.commit("loading/openLoading");
       let newAnswer = [];
+      let newQuestions = [];
       switch (value) {
         case 1:
           newAnswer = [
@@ -175,6 +358,9 @@ export default {
             newAnswer,
             value,
           });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         case 2:
           newAnswer = [
@@ -191,6 +377,9 @@ export default {
             newAnswer,
             value,
           });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         case 3:
           newAnswer = [
@@ -203,11 +392,52 @@ export default {
             newAnswer,
             value,
           });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         case 4:
           this.$store.commit("questionType/showHideQuestionType", {
-            value
+            value,
           });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
+          return;
+        case 5:
+          newQuestions = [
+            {
+              type: 1,
+              content: "",
+              attachments: [],
+              hint: "",
+              answers: [
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+              ],
+            },
+          ];
+          this.$store.commit("questionType/showHideQuestionType", {
+            newQuestions,
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         default:
           return;
@@ -218,25 +448,50 @@ export default {
      * CreatedBy:LEQUAN(11/02/2022)
      */
     clickEditQuestion(index) {
-        console.log(this.exercise.questions[index].attachments);
-      const newAnswer = this.exercise.questions[index].answers;
-      const newQuestion = this.exercise.questions[index].content;
-      const type = this.exercise.questions[index].type;
-      const attachments = this.exercise.questions[index].attachments;
+      this.$store.commit("loading/openLoading");
+      // const newAnswer = this.exercise.questions[index].answers;
+      // const newQuestion = this.exercise.questions[index].content;
+      // const type = this.exercise.questions[index].type;
+      // const attachments = this.exercise.questions[index].attachments;
+      // const newQuestions = this.exercise.questions[index].questions;
+      // const sortOrder = this.exercise.questions[index].sortOrder;
+      // this.$store.commit("questionType/showHideQuestionType", {
+      //   newAnswer,
+      //   index,
+      //   value: type,
+      //   newQuestion,
+      //   attachments,
+      //   sortOrder,
+      //   newQuestions
+      // });
+      const newAnswer = this.formattedQuestions[index].answers;
+      const newQuestion = this.formattedQuestions[index].content;
+      const type = this.formattedQuestions[index].type;
+      const attachments = this.formattedQuestionsData[index].attachments;
+      const newQuestions = this.formattedQuestionsData[index].questions;
+      const sortOrder = this.formattedQuestions[index].sortOrder;
+      const id = this.formattedQuestions[index].id;
       this.$store.commit("questionType/showHideQuestionType", {
         newAnswer,
         index,
         value: type,
         newQuestion,
-        attachments
+        attachments,
+        sortOrder,
+        newQuestions,
+        id
       });
+      setTimeout(() => {
+        this.$store.commit("loading/closeLoading");
+      }, 500);
     },
     /**
      * Click xóa câu hỏi
      * CreatedBy:LEQUAN(11/02/2022)
      */
-    clickDeleteQuestion(index) {
-      this.$store.dispatch("exercise/deleteQuestion", index);
+    clickDeleteQuestion(index, questionType) {
+      // hiển thị lên popup xóa câu hỏi hay ko
+      this.$store.commit("confirmDeletePopup/openDeletePopup", {index, questionType});
     },
   },
 };
@@ -285,6 +540,10 @@ export default {
                     --ck-color-base-background: transparent;
                     --ck-color-base-border: transparent;
                     .content-editor {
+                      // p{
+                      //   color: black;
+                    
+                      // };
                     }
                   }
                 }
@@ -299,8 +558,8 @@ export default {
                   height: 100% !important;
                   cursor: pointer;
                   .image-item {
-                    width: 100%;
-                    height: 100%;
+                    width: 200px;
+                    height: 200px;
                     object-fit: contain;
                   }
                 }

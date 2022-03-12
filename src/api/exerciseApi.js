@@ -2,13 +2,13 @@ import axiosClient from "./axiosClient";
 
 /**
  * exercise api
- * @author: BMThang(06/02/2022)
+ * @author: LEQUAN(06/02/2022)
  */
 const exerciseApi = {
   /**
    * get all exercise
    * @returns exercises
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   getAll() {
     const url = "/Exercises";
@@ -18,7 +18,7 @@ const exerciseApi = {
   /**
    * get exercise by it's id
    * @param {string} exerciseId exercise id
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    * @returns exercise
    */
   getById(exerciseId) {
@@ -35,7 +35,7 @@ const exerciseApi = {
    * @param {string} subjectId subject id
    * @param {string} topicId topic id
    * @returns filted exercises
-   * @author: BMThang(07/02/2022)
+   * @author: LEQUAN(07/02/2022)
    */
   filter(pageSize, pageIndex, searchText, gradeId, subjectId, topicId, isCompleted) {
     const url = `Exercises/Filter`;
@@ -66,7 +66,7 @@ const exerciseApi = {
   /**
    * insert exercise to api
    * @param {object} exerciseData exercise data
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    * @returns new exercise
    */
   insert(exerciseData) {
@@ -82,7 +82,7 @@ const exerciseApi = {
    * update exercise by it's id
    * @param {string} exerciseId exercise id
    * @param {object} exerciseData exercise data
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   update(exerciseId, exerciseData) {
     const url = `/Exercises/${exerciseId}`;
@@ -96,7 +96,7 @@ const exerciseApi = {
   /**
    * delete exercise by it's id
    * @param {string} exerciseId exercise id
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   delete(exerciseId) {
     const url = `/Exercises/${exerciseId}`;

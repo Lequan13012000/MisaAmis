@@ -3,7 +3,7 @@
     <div class="select-answer">
       <div class="grid">
         <div class="select" v-for="(answer, index) in value" :key="index">
-          <div class="thumbnail-lazy">
+          <div class="thumbnail-lazy" :class="convertIdxToClass(index)">
             <div class="ck-editor-custom">
               <CKEditor
                 :value="answer.content"
@@ -14,17 +14,26 @@
             <div class="head">
               <div class="index">{{ convertIndexToCharacter(index) }}</div>
               <div class="right">
-                <div class="toolbar-icon" @click="showHideDeleteAttach(index)" >
+                <div class="toolbar-icon" @click="showHideDeleteAttach(index)">
                   <img src="../../assets/icon/Group_52239.svg" alt="" />
 
                   <ul
-                    :class="['option__list', { 'option__list--active': isShowDeleteAttach==index }]"
+                    :class="[
+                      'option__list',
+                      { 'option__list--active': isShowDeleteAttach == index },
+                    ]"
                   >
                     <li class="item">
                       <label class="btn">Thêm ảnh</label>
                     </li>
                     <li class="item">
-                      <button class="btn" style="width:100%" @click="removeAnswer(index)">Xóa</button>
+                      <button
+                        class="btn"
+                        style="width: 100%"
+                        @click="removeAnswer(index)"
+                      >
+                        Xóa
+                      </button>
                     </li>
                   </ul>
                 </div>
@@ -62,7 +71,7 @@ export default {
   data() {
     return {
       // ẩn hiện form xóa và thêm ảnh
-      isShowDeleteAttach:null,
+      isShowDeleteAttach: null,
     };
   },
   props: {
@@ -76,11 +85,10 @@ export default {
      * hàm lấy giá trị đáp án
      * CreatedBy: LEQUAN (15/02/2022)
      */
-    showHideDeleteAttach(index){
-      if(index==this.isShowDeleteAttach){
-         this.isShowDeleteAttach = null;
-      }
-      else{
+    showHideDeleteAttach(index) {
+      if (index == this.isShowDeleteAttach) {
+        this.isShowDeleteAttach = null;
+      } else {
         this.isShowDeleteAttach = index;
       }
     },
@@ -110,13 +118,22 @@ export default {
       correctAnswer[index].incorrect = !correctAnswer[index].incorrect;
       this.$emit("input", correctAnswer);
     },
-     /**
+    /**
      * hàm xóa đáp án
      *  CreatedBy: LEQUAN (15/02/2022)
      */
-    removeAnswer(index){
-      this.$emit("removeAnswer",index);
-    }
+    removeAnswer(index) {
+      this.$emit("removeAnswer", index);
+    },
+    /**
+     * convert index to class
+     * @author: LEQUAN(25/01/2022)
+     */
+    convertIdxToClass(index) {
+      return `answer-box--${
+        index + 1 <= 4 ? index + 1 : (index + 1) % 4 === 0 ? 4 : (index + 1) % 4
+      }`;
+    },
   },
 };
 </script>
@@ -360,6 +377,18 @@ export default {
                           }
                         }
                       }
+                    }
+                    .answer-box--1 {
+                      background-color: #ffaec7;
+                    }
+                    .answer-box--2 {
+                      background-color: #afeca4;
+                    }
+                    .answer-box--3 {
+                      background-color: #f9c3b7;
+                    }
+                    .answer-box--4 {
+                      background-color: #b7dfff;
                     }
                   }
                 }

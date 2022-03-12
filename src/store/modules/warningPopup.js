@@ -10,9 +10,9 @@ const warningPopup = {
      * open warning popup
      * @param {object} state state
      * @param {string} text text
-     * @author: BMThang(28/01/2022)
+     * @author: LEQUAN(28/01/2022)
      */
-    openWarningPopup(state, text){
+    openWarningPopup(state, text) {
       state.isActive = true;
       state.text = text;
     },
@@ -20,9 +20,9 @@ const warningPopup = {
     /**
      * close warning popup
      * @param {object} state state
-     * @author: BMThang(28/01/2022)
+     * @author: LEQUAN(28/01/2022)
      */
-    [CLOSE_WARNING_POPUP]: (state) => {
+    closeWarningPopup(state) {
       state.isActive = false;
     },
   },

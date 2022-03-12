@@ -4,7 +4,7 @@
       <div class="grid">
         <div></div>
         <div class="select" v-for="(answer, index) in value" :key="index">
-          <div class="thumbnail-lazy" style="background-color: #afeca4">
+          <div class="thumbnail-lazy" :class="convertIdxToClass(index)">
             <div class="ck-editor-custom">
               <CKEditor
                 :value="answer.content"
@@ -13,7 +13,8 @@
               />
             </div>
             <div class="head">
-              <div class="index">{{ convertIndexToCharacter(index) }}</div>
+              <!-- <div class="index">{{ convertIndexToCharacter(index) }}</div> -->
+              <div class="index"></div>
               <div class="right">
                 <div
                   class="toolbar-icon"
@@ -79,16 +80,24 @@ export default {
      */
     correctAnswer(idx) {
       const correctAnswers = [...this.value];
-      const correctAnswer = correctAnswers.map((answer,index) => {
-        if(index == idx){
-          return {...answer,incorrect:true}
+      const correctAnswer = correctAnswers.map((answer, index) => {
+        if (index == idx) {
+          return { ...answer, incorrect: true };
+        } else {
+          return { ...answer, incorrect: false };
         }
-        else{
-          return {...answer,incorrect:false}
-        }
-      })
-      console.log(correctAnswer)
+      });
+      console.log(correctAnswer);
       this.$emit("input", correctAnswer);
+    },
+    /**
+     * convert index to class
+     * @author: LEQUAN(25/01/2022)
+     */
+    convertIdxToClass(index) {
+      return `answer-box--${
+        index + 1 <= 4 ? index + 1 : (index + 1) % 4 === 0 ? 4 : (index + 1) % 4
+      }`;
     },
   },
 };
@@ -232,7 +241,10 @@ export default {
                           width: 100%;
                           height: 100%;
                           background: transparent;
-
+                          p {
+                            font-size: 18px;
+                            font-weight: 700;
+                          }
                           .ck.ck-reset_all {
                             display: none;
                           }
@@ -311,6 +323,12 @@ export default {
                           }
                         }
                       }
+                    }
+                    .answer-box--1 {
+                      background-color: #ffaec7;
+                    }
+                    .answer-box--2 {
+                      background-color: #afeca4;
                     }
                   }
                 }

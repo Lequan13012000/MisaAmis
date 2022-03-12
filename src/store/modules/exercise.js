@@ -1,21 +1,22 @@
 import axios from 'axios'
 import attachmentApi from '../../api/attachmentApi'
+import CommonJS from '../../scripts/commonJS'
 
 const changeIsTempOfAttachments = (exerciseData) => {
     const tempAttachments = [];
 
     // change isTemp in parent questions
     // exerciseData.parentQuestions.forEach((parentQuestion) => {
-    //   parentQuestion.attachments.forEach((attachment) => {
-    //     if (attachment.isTemp === true) {
-    //       attachment.isTemp = false;
-    //       attachment.modifiedDate = modifiedDate;
-    //       tempAttachments.push(attachment);
-    //     }
-    //   });
+    //     parentQuestion.attachments.forEach((attachment) => {
+    //         if (attachment.isTemp === true) {
+    //             attachment.isTemp = false;
+    //             tempAttachments.push(attachment);
+    //         }
+    //     });
     // });
 
     // change isTemp in questions and answer
+
     exerciseData.questions.forEach((question) => {
         // change question attachments
         question.attachments.forEach((attachment) => {
@@ -26,14 +27,13 @@ const changeIsTempOfAttachments = (exerciseData) => {
         });
 
         // change answer attachments
-        question.answers.forEach((answer) => {
-            if (answer.attachment && answer.attachment?.isTemp === true) {
-                answer.attachment.isTemp = false;
-                tempAttachments.push(answer.attachment);
-            }
-        });
+        // question.answers.forEach((answer) => {
+        //     if (answer.attachment && answer.attachment?.isTemp === true) {
+        //         answer.attachment.isTemp = false;
+        //         tempAttachments.push(answer.attachment);
+        //     }
+        // });
     });
-
     return tempAttachments;
 };
 
@@ -77,6 +77,8 @@ const exercise = {
             //     hint: "",
             // }, ],
             // Status: 0
+            questions: [],
+            parentQuestions: [],
             avatarFile: "",
             // avatar: "https://localhost:7051/image/default.png",
         }
@@ -91,25 +93,60 @@ const exercise = {
             data.questions = state.exercise.questions ? state.exercise.questions : []
             data.exerciseId = state.exercise.exerciseId;
             state.exercise = data;
+
         },
         /**
          * Lưu dữ liệu câu hỏi và đáp ấn
          * CreateBy:LEQUAN(17/2/2022)
          */
         saveComposeQuestion(state, data) {
-            const question = data.question
-            const idx = data.idx
+            const question = data.question;
+            const idx = data.idx;
+            const parentQuestion = data.parentQuestion;
+            const questions = data.questions;
             if (idx !== undefined && idx !== null) {
-                state.exercise.questions.splice(idx, 1, question)
+                if (questions && parentQuestion) {
+                    const extParentQuestion = state.exercise.parentQuestions[idx]
+                    const parentId = extParentQuestion.id
+
+                    const sortOrderOfTheFirstChildQuestion = state.exercise.questions.find(question => question.parentId === parentId).sortOrder
+                    // remove children question
+                    state.exercise.questions = state.exercise.questions.filter(question => question.parentId !== parentId)
+                    // add new children questio
+                    state.exercise.questions.splice(sortOrderOfTheFirstChildQuestion, 0, ...questions)
+
+                    //it quest
+                    state.exercise.parentQuestions.splice(idx, 1, parentQuestion)
+                } else {
+
+                    state.exercise.questions.splice(idx, 1, question);
+                }
             } else {
-                state.exercise.questions.push(question);
+                if (questions && parentQuestion) {
+                    state.exercise.questions = [...state.exercise.questions, ...questions];
+                    state.exercise.parentQuestions.push(parentQuestion);
+                } else {
+                    state.exercise.questions.push(question);
+                }
             }
         },
-        deleteQuestion(state, idx) {
-            state.exercise.questions.splice(idx, 1);
+        deleteQuestion(state, { idx, questionType }) {
+            if (questionType === 5) {
+                const parentQuestion = state.exercise.parentQuestions[idx];
+                const parentId = parentQuestion.id;
+                const newQuestions = state.exercise.questions.filter(question => {
+                    return question.parentId !== parentId
+                })
+                console.log(newQuestions)
+                state.exercise.questions = newQuestions
+                state.exercise.parentQuestions.splice(idx, 1)
+            } else {
+
+                state.exercise.questions.splice(idx, 1);
+            }
         },
         getExercise(state, data) {
-            
+
             state.exercise = data;
         },
         /**
@@ -134,38 +171,7 @@ const exercise = {
         saveFakeExercise({ commit }, data) {
             commit('saveDataExercise', data);
         },
-        /**
-         * Lưu dữ liệu bài tập vào database
-         * CreateBy:LEQUAN(20/2/2022)
-         */
-        // saveExercise({ commit, state }, data) {
-        //     const question = data.question;
-        //     const idx = data.idx;
 
-        //     console.log("truoc", state.exercise )
-        //     if (state.exercise.questions.length == 0) {
-        //         commit('saveComposeQuestion', { question, idx });
-
-        //         console.log(state.exercise)
-        //      
-        //         axios.post('https://localhost:7051/api/Exercises', state.exercise).then((response) => {
-        //             console.log(response);
-        //             commit('getExercise', response.data);
-        //             if (data.callback) {
-        //                 data.callback(response.data.exerciseId)
-        //             }
-        //         })
-
-        //     }
-        //     else {
-        //         console.log('sửa câu hỏi')
-        //         commit('saveComposeQuestion', { question, idx });
-        //         axios.put(`https://localhost:7051/api/Exercises/${state.exercise.exerciseId}`, state.exercise).then((response) => {
-        //             console.log(response);
-        //             commit('getExercise', JSON.parse(JSON.stringify(state.exercise)));
-        //         })
-        //     }
-        // },
         /**
          * Lưu dữ liệu bài tập vào database dưới dạng formdata
          * CreateBy:LEQUAN(20/2/2022)
@@ -173,19 +179,28 @@ const exercise = {
         saveExercise({ commit, state }, data) {
             const question = data.question;
             const idx = data.idx;
+            const parentQuestion = data.parentQuestion;
+            const questions = data.questions;
             if (state.exercise.questions.length == 0) {
-                commit('saveComposeQuestion', { question, idx });
+                if (parentQuestion && questions) {
+                    commit("saveComposeQuestion", { parentQuestion, questions, idx });
+                } else {
+                    commit("saveComposeQuestion", { question, idx });
+                }
                 const tempAttachments = changeIsTempOfAttachments(state.exercise);
+                const formatedExercise = CommonJS.formatExerciseDataBeforeSendToServer(state.exercise);
                 const formData = new FormData();
-
-                formData.append("exerciseName", state.exercise.exerciseName);
-                formData.append("gradeId", state.exercise.gradeId);
-                formData.append("gradeName", state.exercise.gradeName);
-                formData.append("subjectId", state.exercise.subjectId);
-                formData.append("subjectName", state.exercise.subjectName);
+                formData.append("exerciseName", formatedExercise.exerciseName);
+                formData.append("gradeId", formatedExercise.gradeId);
+                formData.append("gradeName", formatedExercise.gradeName);
+                formData.append("subjectId", formatedExercise.subjectId);
+                formData.append("subjectName", formatedExercise.subjectName);
+                formData.append("topicIds", JSON.stringify(formatedExercise.topicIds));
                 formData.append("avatarFile", state.exercise.avatarFile);
-                formData.append("avatar", state.exercise.avatar);
-                formData.append("textQuestions", JSON.stringify(state.exercise.questions));
+                formData.append("avatar", formatedExercise.avatar);
+                formData.append("textQuestions", JSON.stringify(formatedExercise.questions));
+                formData.append("textParentQuestions", JSON.stringify(formatedExercise.parentQuestions));
+                formData.append("textTopics", JSON.stringify(formatedExercise.topicIds));
 
                 if (tempAttachments.length > 0) {
                     Promise.all([
@@ -217,27 +232,28 @@ const exercise = {
 
             }
             else {
-                commit('saveComposeQuestion', { question, idx });
+                console.log(parentQuestion && questions);
+                if (parentQuestion && questions) {
+                    commit("saveComposeQuestion", { parentQuestion, questions, idx });
+                } else {
+                    console.log(1);
+                    commit("saveComposeQuestion", { question, idx });
+                }
                 const tempAttachments = changeIsTempOfAttachments(state.exercise);
-                console.log(tempAttachments)
+                const formatedExercise = CommonJS.formatExerciseDataBeforeSendToServer(state.exercise);
                 const formData = new FormData();
-                formData.append("exerciseName", state.exercise.exerciseName);
-                formData.append("gradeId", state.exercise.gradeId);
-                formData.append("gradeName", state.exercise.gradeName);
-                formData.append("subjectId", state.exercise.subjectId);
-                formData.append("subjectName", state.exercise.subjectName);
+                formData.append("exerciseName", formatedExercise.exerciseName);
+                formData.append("gradeId", formatedExercise.gradeId);
+                formData.append("gradeName", formatedExercise.gradeName);
+                formData.append("subjectId", formatedExercise.subjectId);
+                formData.append("subjectName", formatedExercise.subjectName);
+                formData.append("topicIds", JSON.stringify(formatedExercise.topicIds));
                 formData.append("avatarFile", state.exercise.avatarFile);
-                formData.append("avatar", state.exercise.avatar);
-                formData.append("textQuestions", JSON.stringify(state.exercise.questions));
+                formData.append("avatar", formatedExercise.avatar);
+                formData.append("textQuestions", JSON.stringify(formatedExercise.questions));
+                formData.append("textParentQuestions", JSON.stringify(formatedExercise.parentQuestions));
+                formData.append("textTopics", JSON.stringify(formatedExercise.topicIds));
 
-                // axios.put(`https://localhost:7051/api/Exercises/${state.exercise.exerciseId}`, formData, {
-                //     headers: {
-                //         "Content-Type": "multipart/form-data",
-                //     }
-                // }).then((response) => {
-                //     console.log(response);
-                //     commit('getExercise', JSON.parse(JSON.stringify(state.exercise)));
-                // })
                 if (tempAttachments.length > 0) {
 
                     Promise.all([
@@ -250,7 +266,7 @@ const exercise = {
                     ]).then((response) => {
                         commit('getExercise', response[0].data);
                         if (data.callback) {
-                            data.callback(response[0].data.exerciseId)
+                            data.callback(null)
                         }
                     })
                 } else {
@@ -273,19 +289,52 @@ const exercise = {
         * xóa câu hỏi
         * CreateBy:LEQUAN(20/2/2022)
         */
-        deleteQuestion({ commit, state }, idx) {
-            commit('deleteQuestion', idx);
-            axios.put(`https://localhost:7051/api/Exercises/${state.exercise.exerciseId}`, state.exercise).then((response) => {
-                console.log(response);
-                commit('getExercise', JSON.parse(JSON.stringify(state.exercise)));
-            })
+        deleteQuestion({ commit, state }, { idx, questionType }) {
+            commit('deleteQuestion', { idx, questionType });
+            const tempAttachments = changeIsTempOfAttachments(state.exercise);
+            console.log(tempAttachments)
+            const formatedExercise = CommonJS.formatExerciseDataBeforeSendToServer(state.exercise);
+            const formData = new FormData();
+            formData.append("exerciseName", formatedExercise.exerciseName);
+            formData.append("gradeId", formatedExercise.gradeId);
+            formData.append("gradeName", formatedExercise.gradeName);
+            formData.append("subjectId", formatedExercise.subjectId);
+            formData.append("subjectName", formatedExercise.subjectName);
+            formData.append("topicIds", JSON.stringify(formatedExercise.topicIds));
+            formData.append("avatarFile", formatedExercise.avatarFile);
+            formData.append("avatar", formatedExercise.avatar);
+            formData.append("textQuestions", JSON.stringify(formatedExercise.questions));
+            formData.append("textParentQuestions", JSON.stringify(formatedExercise.parentQuestions));
+            formData.append("textTopics", JSON.stringify(formatedExercise.topicIds));
+
+            if (tempAttachments.length > 0) {
+
+                Promise.all([
+                    axios.put(`https://localhost:7051/api/Exercises/${state.exercise.exerciseId}`, formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }),
+                    attachmentApi.copy(tempAttachments)
+                ]).then((response) => {
+                    commit('getExercise', response[0].data);
+                })
+            } else {
+                axios.put(`https://localhost:7051/api/Exercises/${state.exercise.exerciseId}`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }).then((response) => {
+                    commit('getExercise', response.data);
+                })
+            }
         },
         /**
          * Load dữ liệu bài tập 
          * CreateBy:LEQUAN(17/2/2022)
          */
         loadExercise({ commit }) {
-      
+
             axios.get(`https://localhost:7051/api/Exercises`).then((response) => {
                 commit('getExercise', response.data)
             })

@@ -9,37 +9,45 @@
       <div class="el-message-box__content">
         <div class="el-message-box__container">
           <div class="el-message-box__message">
-             <p v-for="(err, idx) in text" :key="idx">
-          {{ err }}
-        </p>
+            <p>Bạn có chắc muốn xóa câu hỏi không ?</p>
           </div>
         </div>
       </div>
       <div class="el-message-box__btns">
-          <BaseButton @click.native="closeWarningPopup">Đồng ý</BaseButton>
+        <BaseButton @click.native="closeDeletePopup">Hủy bỏ</BaseButton>
+        <BaseButton
+          style="background-color: #8a6bf6; color: #fff"
+          @click.native="deleteQuestion"
+          >Xóa</BaseButton
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import BaseButton from "../../components/base/BaseButton.vue"
+import { mapState } from "vuex";
+import BaseButton from "../../components/base/BaseButton.vue";
 export default {
-    components:{
-BaseButton
+  components: {
+    BaseButton,
+  },
+  computed: {
+    ...mapState("confirmDeletePopup", ["isActive","index","questionType"]),
+  },
+  methods: {
+    closeDeletePopup() {
+      this.$store.commit("confirmDeletePopup/closeDeletePopup");
     },
-    computed: {
-          text() {
-      return this.$store.state.warningPopup.text;
+    deleteQuestion() {
+      this.$store.dispatch("exercise/deleteQuestion",{idx: this.index, questionType: this.questionType});
+      this.closeDeletePopup();
+      this.$store.commit("toastMessage/openToastMsg");
+      setTimeout(() => {
+         this.$store.commit("toastMessage/closeToastMsg");
+      },2000)
     },
-    ...mapState("warningPopup",["isActive"])
-    },
-    methods:{
-        closeWarningPopup(){
-            this.$store.commit("warningPopup/closeWarningPopup");
-        }
-    }
+  },
 };
 </script>
 

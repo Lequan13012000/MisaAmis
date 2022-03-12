@@ -1,5 +1,8 @@
 <template>
-  <div class="el-overlay-dynamic" v-show="isShowQuestionType">
+  <div
+    class="el-overlay-dynamic"
+    v-show="isShowQuestionType && exercise.questions"
+  >
     <div class="el-dialog">
       <div class="el-dialog__body">
         <div class="h-fulL">
@@ -7,7 +10,22 @@
             <div class="dialog-content">
               <div class="choose-question-type">
                 <div class="question-index">
-                  <div class="number-no">Câu 1 -</div>
+                  <div class="number-no" v-if="isActiveNumber">
+                    Câu
+                    {{
+                      idxOfSelectedQuestion !== undefined
+                        ? idxOfSelectedQuestion + 1
+                        : exercise.questions.length > 0
+                        ? Math.floor(
+                            Number(
+                              exercise.questions[exercise.questions.length - 1]
+                                .number
+                            )
+                          ) + 1
+                        : 1
+                    }}
+                    -
+                  </div>
                   <div class="ms-combo-box">
                     <BaseCombobox
                       class="custom-combobox"
@@ -20,13 +38,27 @@
                       @input="handleSelectQuestion"
                     />
                   </div>
+                  <div
+                    class="toggle-question-number"
+                    v-if="selectQuestion === 5"
+                  >
+                    <BaseToggleButton
+                      id="toggle-question-number"
+                      name="toggle-question-number"
+                      label="Đánh số thứ tự cho câu hỏi nhỏ"
+                      v-model="isActiveNumber"
+                    />
+                  </div>
                 </div>
               </div>
               <div
                 class="ckeditor"
                 :class="{
                   essay: selectQuestion === 4,
-                  ChooseAnswer: selectQuestion === 1,
+                  ChooseAnswer:
+                    selectQuestion === 1 ||
+                    selectQuestion === 2 ||
+                    selectQuestion === 3,
                 }"
               >
                 <CkEditorQuestion v-model="questions.content" />
@@ -38,6 +70,20 @@
               </div>
               <keep-alive>
                 <component
+                  v-if="questions.type === 5"
+                  v-bind:is="currentComponent"
+                  v-model="questions.questions"
+                  :isActiveNumber="isActiveNumber"
+                  :numberOfParentQuestion="
+                    idxOfSelectedQuestion === undefined
+                      ? exercise.questions.length + 1
+                      : idxOfSelectedQuestion + 1
+                  "
+                  @removeAnswer="removeAnswer"
+                  @onDelete="onDelete"
+                />
+                <component
+                  v-else
                   v-bind:is="currentComponent"
                   v-model="questions.answers"
                   @removeAnswer="removeAnswer"
@@ -57,18 +103,13 @@
         </div>
         <div class="toolbar-right">
           <BaseButton @click.native="showHideQuestionType">Hủy</BaseButton>
-          <BaseButton
-            @click.native="
-              hiddenQuestionType();
-              saveComposeQuestion();
-            "
-            class="button-save"
+          <BaseButton @click.native="saveComposeQuestion()" class="button-save"
             >Lưu</BaseButton
           >
         </div>
       </div>
     </div>
-     <BasePopupValidate />
+    <BasePopupValidate />
   </div>
 </template>
 
@@ -85,6 +126,10 @@ import FillBlankAnswer from "../dialog/FillBlankAnswer.vue";
 import EssayAnswer from "../dialog/EssayAnswer.vue";
 import QuestionAttachment from "../base/QuestionAttachment.vue";
 import BasePopupValidate from "../base/BasePopupValidate.vue";
+import GroupQuestion from "../dialog/GroupQuestion.vue";
+import BaseToggleButton from "../base/BaseToggleButton.vue";
+// resource
+import resource from "../../scripts/resource";
 export default {
   components: {
     // component soạn văn bản
@@ -104,7 +149,10 @@ export default {
     // tệp đính kèm
     QuestionAttachment,
     // popup validate câu hỏi
-    BasePopupValidate
+    BasePopupValidate,
+    GroupQuestion,
+    BaseToggleButton,
+    resource,
   },
   data() {
     return {
@@ -134,8 +182,11 @@ export default {
             image: null,
           },
         ],
+        questions: [],
         hint: "",
       },
+      isActiveNumber: true,
+      idxOfSelectedQuestion: undefined,
     };
   },
   watch: {
@@ -145,6 +196,11 @@ export default {
         this.questions.content = this.$store.state.questionType.content;
         this.questions.attachments = this.$store.state.questionType.attachments;
         this.questions.type = this.$store.state.questionType.selectQuestion;
+        this.questions.questions = this.$store.state.questionType.questions;
+        this.questions.sortOrder = this.$store.state.questionType.sortOrder;
+        this.questions.id = this.$store.state.questionType.id;
+        this.idxOfSelectedQuestion = this.$store.state.questionType.index;
+        this.isActiveNumber = true;
       }
     },
   },
@@ -178,7 +234,7 @@ export default {
       this.$store.commit("questionType/hiddenQuestionType");
     },
     /**
-     * Click vào button thêm đấp án
+     * Click vào button thêm đấp án câu hỏi chọn đáp án
      * CreatedBy: LEQUAN (22/02/2022)
      */
     addAnswer() {
@@ -187,6 +243,7 @@ export default {
         incorrect: false,
       });
     },
+    
     /**
      * hàm xóa đáp án câu hỏi chọn đáp án
      * CreatedBy: LEQUAN (11/02/2022)
@@ -203,6 +260,7 @@ export default {
       this.questions.answers.splice(index, 1);
     },
     handleSelectQuestion() {
+      this.isActiveNumber = true;
       this.questions.type = this.selectQuestion;
       switch (this.selectQuestion) {
         case 1:
@@ -248,6 +306,35 @@ export default {
         case 4:
           this.questions.answers = [];
           return;
+        case 5:
+          this.questions.answers = [];
+          this.questions.questions = [
+            {
+              type: 1,
+              content: "",
+              attachments: [],
+              hint: "",
+              answers: [
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+              ],
+            },
+          ];
+          break;
         default:
           return;
       }
@@ -257,22 +344,65 @@ export default {
      * CreateBy:LEQUAN(17/2/2022)
      */
     saveComposeQuestion() {
-        // validate
+      // validate
       if (!this.validateQuestion()) {
         return;
       }
-      this.$store.dispatch("exercise/saveExercise", {
-        question: this.questions,
-        idx: this.$store.state.questionType.index,
-        callback: (exerciseId) => {
-          this.$router.push(`/storage/${exerciseId}`);
-        },
-      });
+      this.$store.commit("loading/openLoading");
+      if (this.questions.type === 5) {
+        // add group question
+        let parentId = this.questions.id;
+        if (parentId === undefined || parentId === null) {
+          parentId =
+            this.exercise.parentQuestions.length === 0
+              ? 0
+              : this.exercise.parentQuestions[
+                  this.exercise.parentQuestions.length - 1
+                ].id + 1;
+        }
+
+        // new parent question data
+        const parentQuestion = {
+          attachments: this.questions.attachments,
+          content: this.questions.content,
+          id: parentId,
+          isActiveNumber: this.isActiveNumber,
+        };
+
+        const questions = [];
+        // add children questions to question list
+        this.questions.questions.forEach((question) => {
+          questions.push({ ...question, parentId });
+        });
+        this.$store.dispatch("exercise/saveExercise", {
+          question: null,
+          idx: this.$store.state.questionType.sortOrder,
+          parentQuestion,
+          questions,
+          callback: (exerciseId) => {
+            this.hiddenQuestionType();
+            if (exerciseId) this.$router.push(`/storage/${exerciseId}`);
+          },
+        });
+      } else {
+        // add normal question
+        this.$store.dispatch("exercise/saveExercise", {
+          question: this.questions,
+          idx: this.$store.state.questionType.sortOrder,
+          callback: (exerciseId) => {
+            this.hiddenQuestionType();
+            if (exerciseId) this.$router.push(`/storage/${exerciseId}`);
+          },
+        });
+      }
+      setTimeout(() => {
+        this.$store.commit("loading/closeLoading");
+      }, 500);
     },
-     /**
+    /**
      * validate question
      * @returns true if valid else false
-     * @author: BMThang(28/01/2022)
+     * @author: LEQUAN(28/01/2022)
      */
     validateQuestion() {
       let isValid = true;
@@ -287,29 +417,29 @@ export default {
         // validate choose answer question, choose correct or wrong question, fill blank question
         errors =
           this.validateChooseAnswerQuestionChooseCorrectOrWrongQuestionFillBlank(
-            this.questions.content
+            this.questions
           );
       }
 
       if (this.selectQuestion === 4) {
         // validate text question
-        errors = this.validateTextQuestion(this.questions.content);
+        errors = this.validateTextQuestion(this.questions);
       }
 
       if (errors.length > 0) {
         // if invalid => open warning popup
         isValid = false;
-        this.$store.commit("", errors);
+        this.$store.commit("warningPopup/openWarningPopup", errors);
       }
 
       return isValid;
     },
-     /**
+    /**
      * validate choose answer question, choose correct or wrong question, fill blank question
      * @param {object} questionData question data
      * @param {string} questionNumber question number (if has question number => this question is a child question of a group question)
      * @returns {array} error list
-     * @author: BMThang(28/01/2022)
+     * @author: LEQUAN(28/01/2022)
      */
     validateChooseAnswerQuestionChooseCorrectOrWrongQuestionFillBlank(
       questionData,
@@ -319,19 +449,16 @@ export default {
       const errors = [];
       if (
         questionData.content === "" &&
-        questionData.attachments.length === 0 &&
-        !questionNumber
+        questionData.attachments.length === 0
+        // &&!questionNumber
       ) {
         // if question content is empty and question attachments is empty and question number is not empty => add error
         errors.push(resource.typeQuestionContentText);
       }
       if (
-        questionData.answers.every(
-          (answer) => answer.content === "" && !answer.attachment
-        ) ||
+        questionData.answers.every((answer) => answer.content === "") ||
         questionData.answers.some(
-          (answer) =>
-            answer.content === "" && !answer.attachment && answer.isCorrect
+          (answer) => answer.content === "" && answer.incorrect
         )
       ) {
         // if every answer is empty or some answer is correct but content is empty => add error
@@ -343,7 +470,7 @@ export default {
           }`
         );
       }
-      if (questionData.answers.every((answer) => answer.isCorrect === false)) {
+      if (questionData.answers.every((answer) => answer.incorrect === false)) {
         // if every answer is incorrect => add error
         errors.push(
           `${resource.noCorrectAnswerWaringText}${
@@ -361,7 +488,7 @@ export default {
      * validate text question
      * @param {object} questionData question data
      * @returns {array} error list
-     * @author: BMThang(28/01/2022)
+     * @author: LEQUAN(28/01/2022)
      */
     validateTextQuestion(questionData) {
       const errors = [];
@@ -378,6 +505,7 @@ export default {
   computed: {
     ...mapState("questionType", ["dynamics", "isShowQuestionType"]),
     ...mapState("exercise", ["exercise"]),
+    //...mapState("warningPopup", ["exercise"]),
     selectQuestion: {
       get() {
         return this.$store.state.questionType.selectQuestion;
@@ -400,6 +528,8 @@ export default {
           return FillBlankAnswer;
         case 4:
           return EssayAnswer;
+        case 5:
+          return GroupQuestion;
         default:
           return ChooseAnswer;
       }
@@ -418,28 +548,31 @@ export default {
   left: 0;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  overflow: auto;
+
+  // overflow: auto;
   .el-dialog {
+    // overflow: scroll;
     margin-top: 24px;
     width: 1192px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgb(0 0 0 / 16%);
-    height: calc(100vh - 104px);
+    // height: calc(100vh - 104px);
+    height: 650px;
     margin-bottom: 0;
     background-color: #fff2ab;
     position: relative;
     margin: 0 auto 50px;
     background: #ffffff;
-    margin-top: 84px;
+    margin-top: 24px;
     .el-dialog__body {
       padding: 0 24px 24px;
       word-break: break-word;
       border-radius: 10px;
-      height: 100%;
-      overflow: auto;
+      overflow: scroll;
       padding-bottom: 0 !important;
       background-color: #fff;
       overflow-x: hidden;
+      height: 100%;
       .h-fulL {
         height: 100%;
         .ms-form {
@@ -462,11 +595,14 @@ export default {
               .question-index {
                 display: flex;
                 align-items: center;
-                width: 300px;
+                // width: 300px;
                 .number-no {
                   font-size: 16px;
                   font-weight: 700;
                   color: #4e5b6a;
+                }
+                .toggle-question-number {
+                  padding-right: 20px;
                 }
                 .ms-combo-box {
                   .custom-combobox {
@@ -476,10 +612,13 @@ export default {
                       border: none;
                       padding-left: 5px;
                       width: 245px;
+                      font-size: 16px;
+                      font-weight: 700;
+                      color: #4e5b6a;
                       &::placeholder {
                         font-size: 16px;
                         font-weight: 700;
-                        color: #4e5b6a;
+                        color: #8e9085;
                       }
                     }
                   }
@@ -490,11 +629,19 @@ export default {
               ::v-deep .ck-editor__main {
                 border-color: var(--ck-color-base-border);
                 height: 503px;
+                .ck-editor__editable {
+                  border: none;
+                  height: 100%;
+                }
               }
             }
             .ChooseAnswer {
               ::v-deep .ck-editor__main {
-                height: 220px;
+                height: 200px;
+                .ck-editor__editable {
+                  border: none;
+                  height: 100%;
+                }
               }
             }
             .ckeditor {

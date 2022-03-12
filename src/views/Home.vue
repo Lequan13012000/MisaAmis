@@ -115,7 +115,6 @@ export default {
   created() {
     this.$store.dispatch("grades/loadGrade");
     this.$store.dispatch("subjects/loadSubject");
-    /*this.$store.dispatch("topics/loadTopic");*/
   },
   watch: {},
   data() {

@@ -2,7 +2,7 @@ import axiosClient from "./axiosClient";
 
 /**
  * tag api
- * @author: BMThang(06/02/2022)
+ * @author: LEQUAN(06/02/2022)
  */
 const tagApi = {
   /**
@@ -10,7 +10,7 @@ const tagApi = {
    * @param {string} gradeId grade id
    * @param {string} subjectId subject id
    * @returns tags
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   filter: (gradeId, subjectId) => {
     const url = "/Tags/Filter";

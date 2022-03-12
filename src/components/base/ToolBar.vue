@@ -32,9 +32,7 @@
           alt=""
           class="question_icon"
         />
-        <div class="question__desc" @click="showHideQuestionType(5)">
-          Tự luận
-        </div>
+        <div class="question__desc">Tự luận</div>
       </div>
       <div class="question">
         <img
@@ -44,7 +42,7 @@
         />
         <div class="question__desc">Ghép nối</div>
       </div>
-      <div class="question">
+      <div class="question" @click="showHideQuestionType(5)">
         <img
           src="https://sisapapp.misacdn.net/lms/img/group.447cc2ea.svg"
           alt=""
@@ -67,8 +65,7 @@ export default {
      */
     showHideQuestionType(value) {
       let newAnswer = [];
-      const idx = null
-      this.$store.commit("questionType/questionType", value);
+      let newQuestions = [];
       switch (value) {
         case 1:
           newAnswer = [
@@ -89,8 +86,13 @@ export default {
               incorrect: false,
             },
           ];
-          console.log(newAnswer);
-          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          this.$store.commit("questionType/showHideQuestionType", {
+            newAnswer,
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         case 2:
           newAnswer = [
@@ -103,7 +105,13 @@ export default {
               incorrect: false,
             },
           ];
-          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          this.$store.commit("questionType/showHideQuestionType", {
+            newAnswer,
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         case 3:
           newAnswer = [
@@ -112,10 +120,56 @@ export default {
               incorrect: true,
             },
           ];
-          this.$store.commit("questionType/showHideQuestionType",{newAnswer,value,idx});
+          this.$store.commit("questionType/showHideQuestionType", {
+            newAnswer,
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
-           case 4:
-          this.$store.commit("questionType/showHideQuestionType",{value,idx});
+        case 4:
+          this.$store.commit("questionType/showHideQuestionType", {
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
+          return;
+        case 5:
+          newQuestions = [
+            {
+              type: 1,
+              content: "",
+              attachments: [],
+              hint: "",
+              answers: [
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+                {
+                  content: "",
+                  incorrect: false,
+                },
+              ],
+            },
+          ];
+          this.$store.commit("questionType/showHideQuestionType", {
+            newQuestions,
+            value,
+          });
+          setTimeout(() => {
+            this.$store.commit("loading/closeLoading");
+          }, 500);
           return;
         default:
           return;

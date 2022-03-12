@@ -2,13 +2,13 @@ import axiosClient from "./axiosClient";
 
 /**
  * grade api
- * @author: BMThang(06/02/2022)
+ * @author: LEQUAN(06/02/2022)
  */
 const attachmentApi = {
   /**
    * insert attachment to database
    * @param {object} attachment attachment
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   insert(attachment) {
     const url = "Attachments";
@@ -22,7 +22,7 @@ const attachmentApi = {
   /**
    * copy attachment to attachment folder in server
    * @param {Array} attachments attachment array
-   * @author: BMThang(06/02/2022)
+   * @author: LEQUAN(06/02/2022)
    */
   copy(attachments) {
     const url = "Attachments/Copy";

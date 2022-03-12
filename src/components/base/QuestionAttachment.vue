@@ -24,7 +24,11 @@
           </div>
         </a>
         <button tabindex="-1" @click="deleteAttachment(idx)">
-          <div class="m-icon m-icon--x-attachment"></div>
+          <img
+            style="width: 100%; position: absolute; top: 0px; left: 0px"
+            src="https://sisapapp.misacdn.net/lms/img/x_sign.1c600a62.svg"
+            alt=""
+          />
         </button>
       </li>
       <li class="question-attachment__btn">
@@ -39,11 +43,16 @@
         />
         <div class="attachment-loading" v-if="isLoading">
           <div class="attachment-loading__circle"></div>
-          <div class="attachment-loading__text">dang tai</div>
+          <div class="attachment-loading__text">Đang tải</div>
         </div>
         <label :for="id" v-else>
-          <div class="m-icon m-icon--plus"></div>
-          <span>Them</span>
+          <div class="m-icon m-icon--plus">
+            <img
+              src="https://sisapapp.misacdn.net/lms/img/plus_single.108bfd89.svg"
+              alt=""
+            />
+          </div>
+          <span>Thêm tệp đính kèm</span>
         </label>
       </li>
     </ul>
@@ -61,19 +70,19 @@ export default {
   props: {
     /**
      * name of input
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     name: { type: String, default: "" },
 
     /**
      * id of input
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     id: { type: String, default: "" },
 
     /**
      * attachment list
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     value: { type: Array, default: () => [] },
   },
@@ -82,7 +91,7 @@ export default {
     return {
       /**
        * is loading
-       * @author: BMThang(24/02/2022)
+       * @author: LEQUAN(24/02/2022)
        */
       isLoading: false,
     };
@@ -90,7 +99,7 @@ export default {
   computed: {
     /**
      * formatted attachments
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     formattedAttachments() {
       return CommonJS.formattedAttachments(this.value);
@@ -99,7 +108,7 @@ export default {
   methods: {
     /**
      * handle change file
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     async handleChangeFile() {
       if (this.$refs.attachment.files[0]) {
@@ -132,7 +141,7 @@ export default {
     /**
      * delete attachment
      * @param {number} idx index of selected attachment
-     * @author: BMThang(24/02/2022)
+     * @author: LEQUAN(24/02/2022)
      */
     deleteAttachment(idx) {
       // create new attachments
@@ -149,7 +158,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .question-attachment {
   padding-bottom: 11px;
   padding-right: 11px;
@@ -165,8 +173,8 @@ export default {
     align-items: flex-end;
     margin-left: 11px;
     width: 100%;
-    height: 95px;
-    overflow-x: auto;
+    // height: 95px;
+    // overflow-x: auto;
     overflow-y: visible;
     .attachment-card {
       flex-shrink: 0;
@@ -174,9 +182,13 @@ export default {
       height: 72px;
       margin-left: 11px;
       position: relative;
+      &::marker {
+        color: #fff2ab;
+      }
       &:first-child {
         margin-left: 0;
       }
+
       a {
         display: block;
         height: 100%;
@@ -264,7 +276,7 @@ export default {
         margin-top: 4px;
         font-size: 14px;
         font-weight: 700;
-        color: purple;
+        color: rgb(177 130 246);
       }
     }
     .attachment-loading {

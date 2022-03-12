@@ -5,10 +5,7 @@
       class="item-storage"
       v-for="(exe, index) in exercise"
       :key="index"
-      @click.native="
-        showComposeHideToolBar();
- 
-      "
+      @click.native="showComposeHideToolBar()"
     >
       <div class="thumbnail-lazy">
         <div class="avatar">
@@ -16,14 +13,11 @@
             <div class="subject-content">
               {{ exe.gradeName }} - {{ exe.subjectName }}
             </div>
-            <img
-              :src="exe.avatar"
-              alt=""
-            />
+            <img :src="exe.avatar" alt="" />
           </div>
         </div>
         <div class="describe">
-          <div class="title-describe" @click="handleClickMenu" >
+          <div class="title-describe" @click="handleClickMenu">
             <div class="exercise-name">
               <span>{{ exe.exerciseName }}</span>
             </div>
@@ -43,16 +37,20 @@
             >
               <li class="item">
                 <router-link
-                   :to="`/storage/${exe.exerciseId}`"
+                  :to="`/storage/${exe.exerciseId}`"
                   class="btn"
-                  @click="
-                    showComposeHideToolBar();
-                  "
+                  @click="showComposeHideToolBar()"
                   >Xem</router-link
                 >
               </li>
               <li class="item">
-                <button class="btn" style="width: 100%" @click="deleteExercise(exe.exerciseId)">Xóa</button>
+                <button
+                  class="btn"
+                  style="width: 100%"
+                  @click="deleteExercise(exe.exerciseId)"
+                >
+                  Xóa
+                </button>
               </li>
             </ul>
           </div>
@@ -86,11 +84,15 @@ export default {
     };
   },
   mounted() {
+    this.$store.commit("loading/openLoading");
     this.$store.dispatch("exerciseList/loadExercise");
+    setTimeout(() => {
+      this.$store.commit("loading/closeLoading");
+    }, 500);
   },
   computed: {
     ...mapState("exercise", ["exercise"]),
-      ...mapState("exerciseList", ["exercise"]),
+    ...mapState("exerciseList", ["exercise"]),
   },
   props: {
     // id bài tập được Chọn
@@ -102,16 +104,20 @@ export default {
      * CreatedBy: LEQUAN (11/02/2022)
      */
     showComposeHideToolBar() {
+        
       this.$store.commit("composeQuestion/showComposeHideToolBar");
+      
     },
     /**
      * Lấy id của bài tập đc Chọn
      * CreatedBy: LEQUAN (21/02/2022)
      */
     getExerciseId(value) {
-        //e.preventDefault();
-      console.log(value);
+       this.$store.commit("loading/openLoading");
       this.$store.dispatch("exerciseList/loadExerciseSelected", value);
+      setTimeout(() => {
+        this.$store.commit("loading/closeLoading");
+      },500)
     },
     /**
      * Ẩn hiện option xem xóa bài tập
@@ -128,14 +134,14 @@ export default {
     handleClickMenu(e) {
       e.preventDefault();
     },
-     /**
+    /**
      * Xóa bài tập
      * CreatedBy: LEQUAN (21/02/2022)
      */
-    deleteExercise(value){
+    deleteExercise(value) {
       this.isShowOption = null;
-      this.$store.dispatch("exerciseList/deleteExercise",value);
-    }
+      this.$store.commit("confirmDeleteExercise/openDeleteExercise",value);
+    },
   },
 };
 </script>

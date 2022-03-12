@@ -1,5 +1,5 @@
 <template>
-  <div class="el-overlay" v-show="isActive">
+  <div class="el-overlay" v-show="isActiveDeleteExercise">
     <div class="el-message-box">
       <div class="el-message-box__header">
         <div class="el-message-box__title">
@@ -9,43 +9,51 @@
       <div class="el-message-box__content">
         <div class="el-message-box__container">
           <div class="el-message-box__message">
-             <p v-for="(err, idx) in text" :key="idx">
-          {{ err }}
-        </p>
+            <p>Bạn có chắc muốn xóa bài tập này không ?</p>
           </div>
         </div>
       </div>
       <div class="el-message-box__btns">
-          <BaseButton @click.native="closeWarningPopup">Đồng ý</BaseButton>
+        <BaseButton @click.native="closeDeleteExercise">Hủy bỏ</BaseButton>
+        <BaseButton
+          style="background-color: #8a6bf6; color: #fff"
+          @click.native="deleteExercise"
+          >Xóa</BaseButton
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import BaseButton from "../../components/base/BaseButton.vue"
+import { mapState } from "vuex";
+import BaseButton from "../base/BaseButton.vue";
 export default {
-    components:{
-BaseButton
+  components: {
+    BaseButton,
+  },
+  computed: {
+    ...mapState("confirmDeleteExercise", ["isActiveDeleteExercise", "value"]),
+  },
+  methods: {
+    closeDeleteExercise() {
+      this.$store.commit("confirmDeleteExercise/closeDeleteExercise");
     },
-    computed: {
-          text() {
-      return this.$store.state.warningPopup.text;
+    deleteExercise() {
+      this.$store.dispatch("exerciseList/deleteExercise", this.value);
+      this.$store.commit("toastMessage/openToastMsgExercise");
+      setTimeout(() => {
+        this.$store.commit("toastMessage/closeToastMsgExercise");
+      }, 2000);
+      this.closeDeleteExercise();
     },
-    ...mapState("warningPopup",["isActive"])
-    },
-    methods:{
-        closeWarningPopup(){
-            this.$store.commit("warningPopup/closeWarningPopup");
-        }
-    }
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .el-overlay {
-  z-index: 2049;
+  z-index: 10000;
   text-align: center;
   position: fixed;
   top: 0;

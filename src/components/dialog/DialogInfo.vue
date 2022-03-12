@@ -27,22 +27,23 @@
                   class="image"
                 />
                 <div class="ms-upload-field">
-                  <label for="" class="label-input">
+                  <label for="avatar-input" class="label-input">
                     <img
                       src="https://sisapapp.misacdn.net/lms/img/ic_upload-image.20a77bdb.svg"
                       alt=""
                     />
                   </label>
                   <!-- <input type="file" class="change-avatar" /> -->
-                   <input
-                type="file"
-                accept="image/*"
-                class="avatar-input"
-                name="avatar-input"
-                id="avatar-input"
-                ref="exerciseAvatar"
-                @change="handleChangeExerciseAvatar"
-              />
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    class="avatar-input"
+                    name="avatar-input"
+                    id="avatar-input"
+                    ref="exerciseAvatar"
+                    @change="handleChangeExerciseAvatar"
+                  />
                 </div>
               </div>
             </div>
@@ -78,7 +79,7 @@
                     :class="{
                       errorcombobox:
                         errorsObj.SubjectName.length > 0 &&
-                        !fakeExercise.SubjectId,
+                        !fakeExercise.subjectId,
                     }"
                     @changeData="getSelectedSubject"
                   />
@@ -116,18 +117,22 @@
               </div>
               <div class="ms-combo-box">
                 <label for="" class="ms-label">Chủ đề</label>
-                <BaseCombobox
-                  :dataOptions="topics"
-                  fieldValue="topicId"
-                  fieldDisplay="topicName"
-                  placeholder="Chọn chủ đề"
-                />
               </div>
+              <BaseMultiCombobox
+                id="topicId"
+                name="topicId"
+                :placeholder="resource.topicInputPlaceholder"
+                :options="formattedTopics"
+                v-model="fakeExercise.topicIds"
+              />
               <div class="ms-suggest-tag-input">
                 <label for="" class="ms-label">Thẻ tìm kiếm</label>
                 <div class="suggest-container">
                   <span class="el-tag">Ôn tập học kì I</span>
+                  <span class="el-tag">Kiểm tra 15 phút</span>
+                  <span class="el-tag">Thi cuối kì</span>
                 </div>
+
                 <!-- <div class="ms-tag-input">
                   <VoerroTagsInput
                     element-id="tags"
@@ -159,7 +164,9 @@
 import BaseInput from "../base/BaseInput.vue";
 import BaseCombobox from "../base/BaseCombobox.vue";
 import BaseButton from "../base/BaseButton.vue";
+import BaseMultiCombobox from "../base/BaseMultiCombobox.vue";
 import { mapState } from "vuex";
+import resource from "../../scripts/resource";
 // import { mapMutations } from 'vuex';
 // import VoerroTagsInput from "@voerro/vue-tagsinput";
 export default {
@@ -170,16 +177,15 @@ export default {
     BaseCombobox,
     // component button
     BaseButton,
-    // thẻ tìm kiếm
-    // VoerroTagsInput,
+    // chủ đề
+    BaseMultiCombobox,
   },
   created() {
     this.$store.dispatch("grades/loadGrade");
     this.$store.dispatch("subjects/loadSubject");
   },
   mounted() {
-    const exerciseAvatar =
-      this.$store.state.exercise.exercise.avatar;
+    const exerciseAvatar = this.$store.state.exercise.exercise.avatar;
 
     // const subjectAvatar =
     //   this.$store.state.exercise.exercise.subjectAvatar;
@@ -198,9 +204,8 @@ export default {
       // else if avatar file is set => defaultAvatar = avatar file
       this.imageSubject = URL.createObjectURL(avatarFile);
       this.isChangeAvatar = true;
-    }
-    else{
-      this.imageSubject = 'https://localhost:7051/image/default.png';
+    } else {
+      this.imageSubject = "https://localhost:7051/image/default.png";
     }
     //  else if (subjectAvatar) {
     //   // else set defaultAvatar to subject avatar
@@ -233,20 +238,22 @@ export default {
         subjectName: "",
         questions: [],
         avatar: "",
+        topicIds: [],
+        parentQuestions: [],
       },
       // ảnh theo môn
       imageSubject: "",
       // phân biệt sửa thêm bài tập
       isEditExercise: false,
-        /**
+      /**
        * default avatar url
-       * @author: BMThang(25/01/2022)
+       * @author: LEQUAN(25/01/2022)
        */
       defaultAvatar: "",
 
       /**
        * is change avatar
-       * @author: BMThang(25/01/2022)
+       * @author: LEQUAN(25/01/2022)
        */
       isChangeAvatar: false,
     };
@@ -256,6 +263,20 @@ export default {
     ...mapState("grades", ["grades"]),
     ...mapState("exercise", ["exercise"]),
     ...mapState("topics", ["topics"]),
+    resource() {
+      return resource;
+    },
+    /**
+     * formatted topics
+     */
+    formattedTopics() {
+      return [...this.topics].map((topic) => {
+        return {
+          text: topic.topicName,
+          value: topic.topicId,
+        };
+      });
+    },
   },
 
   methods: {
@@ -309,7 +330,11 @@ export default {
           this.$router.push("/storage/createv2");
           this.exercise.questions = [];
         }
+        this.$store.commit("loading/openLoading");
         this.saveDataExercise(exercise);
+        setTimeout(() => {
+          this.$store.commit("loading/closeLoading");
+        }, 1000);
       }
       e.preventDefault();
     },
@@ -323,11 +348,10 @@ export default {
       this.$store.dispatch("exercise/saveFakeExercise", data);
     },
     getSelectedSubject(data) {
-   
       this.fakeExercise.subjectName = data?.subjectName;
       this.imageSubject = data?.image;
       this.fakeExercise.avatar = data?.image;
-       this.fakeExercise.avatarFile = null;
+      this.fakeExercise.avatarFile = null;
       if (this.fakeExercise.gradeId && this.fakeExercise.subjectId) {
         this.$store.dispatch("topics/loadTopic", {
           gradeId: this.fakeExercise.gradeId,
@@ -352,7 +376,6 @@ export default {
      * display uploaded image after user upload image
      */
     handleChangeExerciseAvatar() {
-  
       if (this.$refs.exerciseAvatar.files[0]) {
         // set is change avatar to true
         this.isChangeAvatar = true;
@@ -361,8 +384,8 @@ export default {
         this.$refs.avatar.src = URL.createObjectURL(
           this.$refs.exerciseAvatar.files[0]
         );
-        console.log(this.$refs.exerciseAvatar.files[0])
-         this.fakeExercise.avatarFile = this.$refs.exerciseAvatar.files[0];
+        console.log(this.$refs.exerciseAvatar.files[0]);
+        this.fakeExercise.avatarFile = this.$refs.exerciseAvatar.files[0];
       }
     },
   },

@@ -8,8 +8,10 @@ import questionType from "../store/modules/questionType";
 import subjects from "../store/modules/subjects";
 import topics from "../store/modules/topics"
 import warningPopup from "../store/modules/warningPopup"
-
-
+import loading from "../store/modules/loading"
+import confirmDeletePopup from "../store/modules/confirmDeletePopup"
+import confirmDeleteExercise from "../store/modules/confirmDeleteExercise"
+import toastMessage from "../store/modules/toastMessage"
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -21,6 +23,10 @@ export default new Vuex.Store({
         subjects,
         topics,
         exerciseList,
-        warningPopup
+        warningPopup,
+        loading,
+        confirmDeletePopup,
+        confirmDeleteExercise,
+        toastMessage
     }
 })

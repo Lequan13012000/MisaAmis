@@ -2,7 +2,7 @@ import axios from "axios";
 
 /**
  * axios client
- * @author: BMThang(06/02/2022)
+ * @author: LEQUAN(06/02/2022)
  */
 const axiosClient = axios.create({
   baseURL: "https://localhost:7051/api",
